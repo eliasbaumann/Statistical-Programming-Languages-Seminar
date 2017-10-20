@@ -18,7 +18,7 @@ getJsonData = function(x){
   connection = "https://api.stlouisfed.org/fred/series/observations?"
   api_key = "&api_key=4c5743e8fb183ff3f7f47ba1ae651683&"
   file_type = "file_type=json&"
-  observation_start="observation_start=1950-01-01&"
+  observation_start="observation_start=1980-01-01&"
   observation_end="observation_end=2017-10-01"
   series_id=paste("series_id=",x,sep="")
   
@@ -36,6 +36,10 @@ createFeatureMatrix = function(x){
   res
 }
 
+getVectorPercentageChange = function(x){
+  c(0,((x[2:length(x)]-x[1:length(x)-1])/x[1:length(x)-1]))
+}
+
 
 json = getJsonData("INDPRO")
 
@@ -48,14 +52,8 @@ createFeatureMatrix(series_ids)
 sandp = read.csv("sandp500.csv")
 sandp = sandp[-length(sandp$Date),]
 
-
-length = length(sandp$Adj.Close)
-sandp["returns"] = c(0,(sandp$Adj.Close[2:length]-sandp$Adj.Close[1:length-1])/sandp$Adj.Close[1:length-1])
-
+sandp["returns"] = getVectorPercentageChange(sandp$Adj.Close)
 sandp
-
-
-
 
 ```
 
