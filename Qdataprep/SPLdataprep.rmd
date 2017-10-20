@@ -36,6 +36,8 @@ createFeatureMatrix = function(x){
   res
 }
 
+
+#calculates the change, adds a zero in the front to keep vector length
 getVectorPercentageChange = function(x){
   c(0,((x[2:length(x)]-x[1:length(x)-1])/x[1:length(x)-1]))
 }
@@ -53,7 +55,7 @@ sandp = read.csv("sandp500.csv")
 sandp = sandp[-length(sandp$Date),]
 
 sandp["returns"] = getVectorPercentageChange(sandp$Adj.Close)
-sandp
+sandp$
 
 ```
 
