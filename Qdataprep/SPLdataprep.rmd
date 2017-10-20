@@ -28,10 +28,13 @@ getJsonData = function(x){
 #create time series with multiple dimensions
 createFeatureMatrix = function(x){
   res = getJsonData(x[1])$observations[c("date","value")]
+  res$value = as.numeric(res$value)
+  res$date = as.Date(res$date)
   colnames(res) = c("date",x[1])
+  
   for(i in x[2:length(x)]){
     tmp = getJsonData(i)
-    res[i]=tmp$observations$value
+    res[i]=as.numeric(tmp$observations$value)
   }
   res
 }
@@ -48,8 +51,10 @@ json = getJsonData("INDPRO")
 json$observations[c("date","value")]
 
 series_ids = c("INDPRO","CURRCIR")
-data = createFeatureMatrix(series_ids)
+train = createFeatureMatrix(series_ids)
 
+train[2:length(train)] = apply(train[,2:length(train)],2,getVectorPercentageChange)
+train
 
 sandp = read.csv("sandp500.csv")
 sandp = sandp[-length(sandp$Date),]
@@ -57,6 +62,6 @@ sandp = sandp[-length(sandp$Date),]
 sandp["returns"] = getVectorPercentageChange(sandp$Adj.Close)
 
 save(sandp, file="S&P.RData")
-save(data, file="data.RData")
+save(train, file="data.RData")
 ```
 
