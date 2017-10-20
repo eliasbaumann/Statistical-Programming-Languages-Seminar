@@ -18,7 +18,7 @@ getJsonData = function(x){
   connection = "https://api.stlouisfed.org/fred/series/observations?"
   api_key = "&api_key=4c5743e8fb183ff3f7f47ba1ae651683&"
   file_type = "file_type=json&"
-  observation_start="observation_start=1992-01-01&"
+  observation_start="observation_start=1992-02-01&"
   observation_end="observation_end=2017-01-01"
   series_id=paste("series_id=",x,sep="")
   
@@ -39,8 +39,6 @@ createFeatureMatrix = function(x){
   res
 }
 
-
-
 #calculates the change, adds a zero in the front to keep vector length
 getVectorPercentageChange = function(x){
   c(0,(diff(x,lag = 1)/x[1:length(x)-1]))
@@ -48,18 +46,17 @@ getVectorPercentageChange = function(x){
 
 series_ids = unlist(read.csv("frednametags.csv",stringsAsFactors = FALSE))
 
-train = createFeatureMatrix(series_ids)
 
-train[2:length(train)] = apply(train[,2:length(train)],2,getVectorPercentageChange)
+
+train = createFeatureMatrix(series_ids)
+train["GDAXI"] = read.csv("^GDAXI.csv")$Adj.Close
+train["HSI"] = read.csv("^HSI.csv")$Adj.Close
+train["N225"] = read.csv("^N225")$Adj.Close
+train["S&P500"] = read.csv("sandp500.csv")$Adj.Close
 
 train
+train[2:length(train)] = apply(train[,2:length(train)],2,getVectorPercentageChange)
 
-sandp = read.csv("sandp500.csv")
-sandp = sandp[-length(sandp$Date),]
-
-sandp["returns"] = getVectorPercentageChange(sandp$Adj.Close)
-
-save(sandp, file="S&P.RData")
 save(train, file="data.RData")
 ```
 
