@@ -16,16 +16,14 @@ getJsonData = function(x){
   connection = "https://api.stlouisfed.org/fred/series/observations?"
   api_key = "&api_key=4c5743e8fb183ff3f7f47ba1ae651683&"
   file_type = "file_type=json&"
-  observation_end="observation_end=2017-10-01&"
-  observation_start="observation_start=1950-01-01"
-  series_id=x
+  observation_start="observation_start=1950-01-01&"
+  observation_end="observation_end=2017-10-01"
+  series_id=paste("series_id=",x,sep="")
   
-  paste(connection,series_id,api_key,file_type,observation_end,observation_start, sep = "")
+  fromJSON(paste(connection,series_id,api_key,file_type,observation_start,observation_end, sep = ""))
 }
 
-getJsonData("INDPRO")
-
-json = fromJSON("https://api.stlouisfed.org/fred/series/observations?series_id=INDPRO&api_key=4c5743e8fb183ff3f7f47ba1ae651683&file_type=json&observation_end=2017-10-01&observation_start=1950-01-01")
+json = getJsonData("INDPRO")
 
 json$observations[c("date","value")]
 
