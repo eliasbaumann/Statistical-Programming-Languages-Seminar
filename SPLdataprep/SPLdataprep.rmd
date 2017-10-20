@@ -11,9 +11,35 @@ knitr::opts_chunk$set(echo = TRUE)
 ```{r}
 library(httr)
 library(jsonlite)
-json = fromJSON("https://api.stlouisfed.org/fred/series/observations?series_id=GNPCA&api_key=4c5743e8fb183ff3f7f47ba1ae651683&file_type=json")
+
+getJsonData = function(x){
+  connection = "https://api.stlouisfed.org/fred/series/observations?"
+  api_key = "&api_key=4c5743e8fb183ff3f7f47ba1ae651683&"
+  file_type = "file_type=json&"
+  observation_end="observation_end=2017-10-01&"
+  observation_start="observation_start=1950-01-01"
+  series_id=x
+  
+  paste(connection,series_id,api_key,file_type,observation_end,observation_start, sep = "")
+}
+
+getJsonData("INDPRO")
+
+json = fromJSON("https://api.stlouisfed.org/fred/series/observations?series_id=INDPRO&api_key=4c5743e8fb183ff3f7f47ba1ae651683&file_type=json&observation_end=2017-10-01&observation_start=1950-01-01")
+
 json$observations[c("date","value")]
+
+sandp = read.csv("sandp500.csv")
+sandp = sandp[-length(sandp$Date),]
+
+
+length = length(sandp$Adj.Close)
+sandp["returns"] = c(0,(sandp$Adj.Close[2:length]-sandp$Adj.Close[1:length-1])/sandp$Adj.Close[1:length-1])
+
+sandp
+
 
 
 
 ```
+
