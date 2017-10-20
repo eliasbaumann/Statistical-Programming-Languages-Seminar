@@ -12,6 +12,8 @@ knitr::opts_chunk$set(echo = TRUE)
 library(httr)
 library(jsonlite)
 
+
+#getting macroeconomic data from FRED
 getJsonData = function(x){
   connection = "https://api.stlouisfed.org/fred/series/observations?"
   api_key = "&api_key=4c5743e8fb183ff3f7f47ba1ae651683&"
@@ -23,9 +25,25 @@ getJsonData = function(x){
   fromJSON(paste(connection,series_id,api_key,file_type,observation_start,observation_end, sep = ""))
 }
 
+#create time series with multiple dimensions
+createFeatureMatrix = function(x){
+  res = getJsonData(x[1])$observations[c("date","value")]
+  colnames(res) = c("date",x[1])
+  for(i in x[2:length(x)]){
+    tmp = getJsonData(i)
+    res[i]=tmp$observations$value
+  }
+  res
+}
+
+
 json = getJsonData("INDPRO")
 
 json$observations[c("date","value")]
+
+series_ids = c("INDPRO","CURRCIR")
+createFeatureMatrix(series_ids)
+
 
 sandp = read.csv("sandp500.csv")
 sandp = sandp[-length(sandp$Date),]
