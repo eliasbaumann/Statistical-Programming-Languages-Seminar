@@ -48,14 +48,15 @@ json = getJsonData("INDPRO")
 json$observations[c("date","value")]
 
 series_ids = c("INDPRO","CURRCIR")
-createFeatureMatrix(series_ids)
+data = createFeatureMatrix(series_ids)
 
 
 sandp = read.csv("sandp500.csv")
 sandp = sandp[-length(sandp$Date),]
 
 sandp["returns"] = getVectorPercentageChange(sandp$Adj.Close)
-sandp$
 
+save(sandp, file="S&P.RData")
+save(data, file="data.RData")
 ```
 
