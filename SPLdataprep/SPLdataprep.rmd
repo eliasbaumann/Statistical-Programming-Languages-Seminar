@@ -1,0 +1,19 @@
+---
+title: "SPL data preparation"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+```{r}
+library(httr)
+library(jsonlite)
+json = fromJSON("https://api.stlouisfed.org/fred/series/observations?series_id=GNPCA&api_key=4c5743e8fb183ff3f7f47ba1ae651683&file_type=json")
+json$observations[c("date","value")]
+
+
+
+```
