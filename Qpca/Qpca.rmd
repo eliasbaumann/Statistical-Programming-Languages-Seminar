@@ -10,6 +10,39 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ```{r}
 load("../Qdataprep/data.RData")
+# Format data into POSIXct 
+train[,1] = as.POSIXct(train[,1])
+end_date = as.POSIXct("2015-01-01")
+# Only use data until december 2014 to select the model
+x = train[train$date < a,]
+y = x$`S&P500`
 
+pca_data = prcomp(x[,-1],
+                  center = T,
+                  scale. = T)
+
+summary(pca_data)
+plot(pca_data, type = "l")
+
+# Model selection
+
+
+z = as.matrix(pca_data$rotation[,1])
+dat = as.matrix(x[,-1])
+
+diff_index1 = dat %*% z
+a = lm(y ~ diff_index1)
+summary(a)
+BIC()
 
 ```
+
+
+```{r}
+pca_data = prcomp(subset(train[,-1],),
+                  center = T,
+                  scale. = T)
+
+predict.prcomp()
+```
+
