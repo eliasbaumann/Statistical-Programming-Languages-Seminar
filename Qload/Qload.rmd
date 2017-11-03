@@ -53,12 +53,7 @@ train["HSI"] = read.csv("^HSI.csv")$Adj.Close
 train["N225"] = read.csv("^N225.csv")$Adj.Close
 train["S&P500"] = read.csv("sandp500.csv")$Adj.Close
 
-train[2:length(train)] = apply(train[,2:length(train)],2,getVectorPercentageChange)
-
-#center and scale
-scaledtrain = scale(train[,-1])
-train[,-1] = scaledtrain
-train
+train[,-1] = apply(train[,-1],2,getVectorPercentageChange)
 
 save(train, file="data.RData")
 ```
