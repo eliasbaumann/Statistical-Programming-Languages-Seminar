@@ -9,7 +9,7 @@ knitr::opts_chunk$set(echo = TRUE)
 
 
 ```{r}
-load("../Qdataprep/data.RData")
+load("../Qprepare/prepareddata.RData")
 # Format data into POSIXct 
 train[,1] = as.POSIXct(train[,1])
 end_date = as.POSIXct("2015-01-01")
