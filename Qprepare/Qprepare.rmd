@@ -1,0 +1,35 @@
+---
+title: "Qprepare"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+load("../Qload/data.RData")
+#check for outliers visually
+boxplot(train[,-1])
+
+boxplot.stats(train[,29])$out
+boxplot.stats(train[,43])$out
+
+colnames(train)[29]
+colnames(train)[43]
+
+boxplot(train[,c("FRBLMCI","MEDCPIM158SFRBCLE")])
+
+train[train$FRBLMCI %in% boxplot.stats(train[,29])$out & (train$FRBLMCI>8 | train$FRBLMCI<(-8)) ,c("date","FRBLMCI")]
+
+#since this is macroeconomic data and all outliers are explainable by events or legislations (which can be treated as events as well)
+```
+
+```{r}
+#center and scale
+scaledtrain = scale(train[,-1])
+train[,-1] = scaledtrain
+
+save(train, file="prepareddata.RData")
+```
+

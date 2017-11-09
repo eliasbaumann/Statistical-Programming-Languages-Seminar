@@ -46,16 +46,14 @@ getVectorPercentageChange = function(x){
 
 series_ids = unlist(read.csv("frednametags.csv",stringsAsFactors = FALSE))
 
-
-
 train = createFeatureMatrix(series_ids)
+
 train["GDAXI"] = read.csv("^GDAXI.csv")$Adj.Close
 train["HSI"] = read.csv("^HSI.csv")$Adj.Close
 train["N225"] = read.csv("^N225.csv")$Adj.Close
 train["S&P500"] = read.csv("sandp500.csv")$Adj.Close
 
-train
-train[2:length(train)] = apply(train[,2:length(train)],2,getVectorPercentageChange)
+train[,-1] = apply(train[,-1],2,getVectorPercentageChange)
 
 save(train, file="data.RData")
 ```
