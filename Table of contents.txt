@@ -2,6 +2,6 @@
 2. Quantlet	Data preparation/normalization
 3. Quantlet	PCA and plot of variance explanation power of PCs
 4. Quantlet	PCA modelselection (BIC), forecasting and plot of real data vs. forecasts 1/3/6-month ahead forecasts
-5. Quantlet	Benchmark AR(p) modelselection(BIC), forecasting and plot AR(p) vs. PCA forecast vs. real data 1/3/6-month ahead forecasts
-6. Quantlet	Mixed model PCA-AR(p) modelselection(BIC), forecasting and plot AR(p) vs. PC/PCA-AR forecasts vs. real data 1/3/6-month ahead forecasts
+5. Quantlet	Construct a Benchmark AR(p), defining p via BIC modelselection, forecasting and plot AR(p) vs. PCA forecast vs. real data 1/3/6-month ahead forecasts
+6. Quantlet	Construct a mixed model PCA-AR(p), defining p via BIC modelselection, forecasting and plot PCA-AR(p) vs. PC/AR(p) forecasts vs. real data 1/3/6-month ahead forecasts
 7. Quantlet	Compute Root Mean Square Error (RMSE) of forecasting errors of each forecasting model and compare
