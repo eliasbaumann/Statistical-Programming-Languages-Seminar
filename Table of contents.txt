@@ -1,5 +1,5 @@
 1. Quantlet	Data download/read
-2. Quantlet	Data preparation/normalization
+2. Quantlet	Data preparation/normalization + Outlier Analysis (we dont remove any)
 3. Quantlet	PCA and plot of variance explanation power of PCs
 4. Quantlet	PCA modelselection (BIC), forecasting and plot of real data vs. forecasts 1/3/6-month ahead forecasts
 5. Quantlet	Construct a Benchmark AR(p), defining p via BIC modelselection, forecasting and plot AR(p) vs. PCA forecast vs. real data 1/3/6-month ahead forecasts
