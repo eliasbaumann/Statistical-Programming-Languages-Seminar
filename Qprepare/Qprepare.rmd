@@ -8,7 +8,16 @@ knitr::opts_chunk$set(echo = TRUE)
 ```
 
 ```{r}
+library(ggplot2)
+
 load("../Qload/data.RData")
+#check for NA values
+any(is.na(train))
+
+#compare some data 
+ggplot(data=train,
+       aes(x=date))  + geom_smooth(aes(y = `S&P500`), colour="blue",span=0.1) + geom_smooth(aes(y = GDAXI), colour = "red", span=0.1) + geom_smooth(aes(y = IPMAN), colour = "cyan", span=0.1)
+
 #check for outliers visually
 boxplot(train[,-1])
 
@@ -18,11 +27,15 @@ boxplot.stats(train[,43])$out
 colnames(train)[29]
 colnames(train)[43]
 
+#Change in Labor Market conditions Median consumer price index
 boxplot(train[,c("FRBLMCI","MEDCPIM158SFRBCLE")])
 
 train[train$FRBLMCI %in% boxplot.stats(train[,29])$out & (train$FRBLMCI>8 | train$FRBLMCI<(-8)) ,c("date","FRBLMCI")]
 
+train[train$MEDCPIM158SFRBCLE %in% boxplot.stats(train[,43])$out & (train$MEDCPIM158SFRBCLE>5 | train$MEDCPIM158SFRBCLE<(-5)) ,c("date","MEDCPIM158SFRBCLE")]
+
 #since this is macroeconomic data and all outliers are explainable by events or legislations (which can be treated as events as well)
+#data will be centered and scaled so no variable will have a bigger impact than another
 ```
 
 ```{r}
