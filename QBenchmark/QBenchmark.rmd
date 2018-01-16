@@ -9,7 +9,61 @@ knitr::opts_chunk$set(echo = TRUE)
 
 
 ```{r}
-load("../Qprepare/prepareddata.RData")
+load("../Qdataprep/data.RData")
+train
+if(!require("forecast")) install.packages("forecast"); library("forecast")
+if(!require("tseries")) install.packages("tseries"); library("tseries")
 
 
+#str(train)
+#myts <- ts(train$`S&P500`, start=c(1992, 2), end=c(2017, 1), frequency=12) 
+
+
+# Vergleich a lag 1 - 10 und dann min BIC rausbekommen
+
+fit = auto.arima(train$`S&P500`, seasonal=FALSE)
+fit_w_seasonality = auto.arima(train$`S&P500`, seasonal=TRUE)
+fit_w_seasonality
+tsdisplay(residuals(fit), lag.max=10, main='(0,0,0) Model Residuals')
+
+fit2 = arima(train$`S&P500`, order=c(0,0,8))
+fit2
+tsdisplay(residuals(fit), lag.max=10, main='(0,0,8) Model Residuals')
+
+fcast <- forecast(fit2, h=24)
+plot(fcast)
+
+hold <- window(ts(train$`S&P500`), start=276)
+
+fit_no_holdout = arima(ts(train$`S&P500`[-c(276:300)]), order=c(0,0,8))
+
+fcast_no_holdout <- forecast(fit_no_holdout,h=24)
+plot(fcast_no_holdout, main=" ")
+lines(ts(train$`S&P500`))
+
+
+
+
+```
+
+for(i in  0:10){
+    #fit = arima(train$`S&P500`, order=c(i, 0, 0))
+    fit = arima(myts, order=c(i, 0, 0))
+    BIC[i]= BIC(fit)
+    }
+
+min=which(BIC == min(BIC))
+min(BIC)
+min1=0
+
+fitMinBIC = arima(myts, order=c(min1, 0, 0))
+BIC(fitMinBIC)
+
+
+forecast = forecast(fitMinBIC, h=24)
+accuracy(fitMinBIC)
+plot(forecast(fitMinBIC, 276))
+ 
+#a$coef
+#a$model
 ```

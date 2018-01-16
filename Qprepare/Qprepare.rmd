@@ -40,9 +40,11 @@ train[train$MEDCPIM158SFRBCLE %in% boxplot.stats(train[,43])$out & (train$MEDCPI
 
 ```{r}
 #center and scale
+unscaled_train = train
 scaledtrain = scale(train[,-1])
 train[,-1] = scaledtrain
-
-save(train, file="prepareddata.RData")
+scaledtrain = train
+save(scaledtrain, file="prepareddataSC.RData")
+save(unscaled_train, file = "prepareddata.RData")
 ```
 
