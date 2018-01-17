@@ -39,6 +39,17 @@ train[train$MEDCPIM158SFRBCLE %in% boxplot.stats(train[,43])$out & (train$MEDCPI
 ```
 
 ```{r}
+#calculates the change, adds a zero in the front to keep vector length
+getVectorPercentageChange = function(x){
+  c(0,(diff(x,lag = 1)/x[1:length(x)-1]))
+}
+
+train[,-1] = apply(train[,-1],2,getVectorPercentageChange)
+
+
+```
+
+```{r}
 #center and scale
 unscaled_train = train
 scaledtrain = scale(train[,-1])
