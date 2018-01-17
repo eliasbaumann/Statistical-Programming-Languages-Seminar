@@ -77,6 +77,8 @@ df = as.data.frame(do.call("rbind", list(gdaxi, hsi, n225, s500)))
 names(df) = names(preppedTable)
 
 seriesDetails = rbind(preppedTable,df)
+seriesDetails$id = as.character(seriesDetails$id)
+seriesDetails = seriesDetails[order(seriesDetails$id),]
 
 train = createFeatureMatrix(series_ids)
 
