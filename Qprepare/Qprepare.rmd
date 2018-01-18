@@ -8,7 +8,16 @@ knitr::opts_chunk$set(echo = TRUE)
 ```
 
 ```{r}
+library(ggplot2)
+
 load("../Qload/data.RData")
+#check for NA values
+any(is.na(train))
+
+#compare some data 
+ggplot(data=train,
+       aes(x=date))  + geom_smooth(aes(y = `S&P500`), colour="blue",span=0.1) + geom_smooth(aes(y = GDAXI), colour = "red", span=0.1) + geom_smooth(aes(y = IPMAN), colour = "cyan", span=0.1)
+
 #check for outliers visually
 boxplot(train[,-1])
 
@@ -18,11 +27,65 @@ boxplot.stats(train[,43])$out
 colnames(train)[29]
 colnames(train)[43]
 
+#Change in Labor Market conditions Median consumer price index
 boxplot(train[,c("FRBLMCI","MEDCPIM158SFRBCLE")])
 
 train[train$FRBLMCI %in% boxplot.stats(train[,29])$out & (train$FRBLMCI>8 | train$FRBLMCI<(-8)) ,c("date","FRBLMCI")]
 
+train[train$MEDCPIM158SFRBCLE %in% boxplot.stats(train[,43])$out & (train$MEDCPIM158SFRBCLE>5 | train$MEDCPIM158SFRBCLE<(-5)) ,c("date","MEDCPIM158SFRBCLE")]
+
 #since this is macroeconomic data and all outliers are explainable by events or legislations (which can be treated as events as well)
+#data will be centered and scaled so no variable will have a bigger impact than another
+```
+
+```{r}
+library(dplyr)
+library(data.table)
+
+#Define which preprocessing step should be done for the time series
+#This is based on the appendix of the paper and on the authors choices of what to apply
+
+seriesDetails$preparation = case_when(
+  seriesDetails$units %in% c("3-Month Annualized Percent Change","Percent","Percent Change at Annual Rate","Percent of Capacity" ) 
+  | grepl("Nonsupervisory Employees: Manufacturing",seriesDetails$title) ~ "Nothing",
+  grepl("Consumer Price",seriesDetails$title) 
+  | grepl("Hourly Earnings", seriesDetails$title) ~ "Second Difference of Logarithm",
+  grepl("Index",seriesDetails$units) 
+  | grepl("Thousands",seriesDetails$units) 
+  | seriesDetails$units %in% "Millions of Dollars" 
+  | grepl("Personal Consumption",seriesDetails$title) ~ "First Difference of Logarithm",
+  TRUE ~ "Second Difference of Logarithm"
+)
+dt = as.data.table(seriesDetails)
+setindex(dt, "id")
+
+dt[id %in% "AWHI"]$preparation
+dt
+
+firstDifferenceLog = function(x){
+  tmp = diff(log(x), lag = 1)
+  
+}
+
+secondDifferenceLog = function(x){
+  tmp = diff(log(x), lag = 1, differences = 2)
+}
+
+prepare = function(data,lookup){
+  
+}
+
+
+#will no longer be used:
+
+#calculates the change, adds a zero in the front to keep vector length
+#getVectorPercentageChange = function(x){
+#  c(0,(diff(x,lag = 1)/x[1:length(x)-1]))
+#}
+
+#train[,-1] = apply(train[,-1],2,getVectorPercentageChange)
+
+
 ```
 
 ```{r}

@@ -25,6 +25,14 @@ getJsonData = function(x){
   fromJSON(paste(connection,series_id,api_key,file_type,observation_start,observation_end, sep = ""))
 }
 
+getSeriesInfo = function(x){
+  connection = "https://api.stlouisfed.org/fred/series?"
+  api_key = "&api_key=4c5743e8fb183ff3f7f47ba1ae651683&"
+  file_type = "file_type=json"
+  series_id=paste("series_id=",x,sep="")
+  fromJSON(paste(connection,series_id,api_key,file_type, sep = ""))
+}
+
 #create time series with multiple dimensions
 createFeatureMatrix = function(x){
   res = getJsonData(x[1])$observations[c("date","value")]
@@ -39,12 +47,38 @@ createFeatureMatrix = function(x){
   res
 }
 
-#calculates the change, adds a zero in the front to keep vector length
-getVectorPercentageChange = function(x){
-  c(0,(diff(x,lag = 1)/x[1:length(x)-1]))
+createPrepTable = function(x){
+  columnnames = colnames(getSeriesInfo(x[1])$seriess)[c(1,4,5,6,7,9,11)]
+  res = matrix(nrow=length(x)+1,ncol = length(columnnames))
+  
+  res[1,] = columnnames
+  for(i in seq_along(x)){
+    tmp = getSeriesInfo(x[i])$seriess
+    res[i+1,] = as.vector(unlist(tmp[columnnames]))
+    
+  }
+  res
 }
 
-series_ids = unlist(read.csv("frednametags.csv",stringsAsFactors = FALSE))
+
+series_ids = as.vector(unlist(read.csv("frednametags.csv",stringsAsFactors = FALSE,header=FALSE)))
+prepTable = createPrepTable(series_ids)
+
+preppedTable = as.data.frame(prepTable[1:length(series_ids)+1,])
+names(preppedTable) = prepTable[1,]
+
+#[1] "id" "title" "observation_start" "observation_end" "frequency" "units" "seasonal_adjustment"
+gdaxi = c("GDAXI","German DAX Index","1992-01-31","2016-12-31","Monthly","Index 1987 = 1000","Not Seasonally Adjusted")
+hsi = c("HSI","Hang Seng Index","1992-01-31","2016-12-31","Monthly","Index 1964 = 100","Not Seasonally Adjusted")
+n225 = c("N225","Nikkei 225","1992-01-31","2016-12-31","Monthly","Index Points","Not Seasonally Adjusted") 
+s500 = c("S500","Standard & Poor's 500","1992-02-01","2017-01-01","Monthly","Index Points","Not Seasonally Adjusted") 
+
+df = as.data.frame(do.call("rbind", list(gdaxi, hsi, n225, s500)))
+names(df) = names(preppedTable)
+
+seriesDetails = rbind(preppedTable,df)
+seriesDetails$id = as.character(seriesDetails$id)
+seriesDetails = seriesDetails[order(seriesDetails$id),]
 
 train = createFeatureMatrix(series_ids)
 
@@ -53,8 +87,7 @@ train["HSI"] = read.csv("^HSI.csv")$Adj.Close
 train["N225"] = read.csv("^N225.csv")$Adj.Close
 train["S&P500"] = read.csv("sandp500.csv")$Adj.Close
 
-train[,-1] = apply(train[,-1],2,getVectorPercentageChange)
 
-save(train, file="data.RData")
+save(list = c("train", "seriesDetails"), file="data.RData")
 ```
 
