@@ -71,7 +71,7 @@ names(preppedTable) = prepTable[1,]
 gdaxi = c("GDAXI","German DAX Index","1992-01-31","2016-12-31","Monthly","Index 1987 = 1000","Not Seasonally Adjusted")
 hsi = c("HSI","Hang Seng Index","1992-01-31","2016-12-31","Monthly","Index 1964 = 100","Not Seasonally Adjusted")
 n225 = c("N225","Nikkei 225","1992-01-31","2016-12-31","Monthly","Index Points","Not Seasonally Adjusted") 
-s500 = c("S500","Standard & Poor's 500","1992-02-01","2017-01-01","Monthly","Index Points","Not Seasonally Adjusted") 
+s500 = c("S&P500","Standard & Poor's 500","1992-02-01","2017-01-01","Monthly","Index Points","Not Seasonally Adjusted") 
 
 df = as.data.frame(do.call("rbind", list(gdaxi, hsi, n225, s500)))
 names(df) = names(preppedTable)

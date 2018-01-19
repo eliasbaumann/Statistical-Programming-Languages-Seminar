@@ -21,21 +21,22 @@ ggplot(data=train,
 #check for outliers visually
 boxplot(train[,-1])
 
-boxplot.stats(train[,29])$out
-boxplot.stats(train[,43])$out
-
-colnames(train)[29]
-colnames(train)[43]
-
-#Change in Labor Market conditions Median consumer price index
-boxplot(train[,c("FRBLMCI","MEDCPIM158SFRBCLE")])
-
-train[train$FRBLMCI %in% boxplot.stats(train[,29])$out & (train$FRBLMCI>8 | train$FRBLMCI<(-8)) ,c("date","FRBLMCI")]
-
-train[train$MEDCPIM158SFRBCLE %in% boxplot.stats(train[,43])$out & (train$MEDCPIM158SFRBCLE>5 | train$MEDCPIM158SFRBCLE<(-5)) ,c("date","MEDCPIM158SFRBCLE")]
-
 #since this is macroeconomic data and all outliers are explainable by events or legislations (which can be treated as events as well)
 #data will be centered and scaled so no variable will have a bigger impact than another
+```
+
+```{r}
+#Dickey Fuller Test
+library(urca)
+
+dickey = function(x){
+  df = ur.df(train[,x],type="none",lags=1)
+  df@teststat[1,1] < df@cval[1,1]
+  
+}
+
+seriesDetails$dickeyres = sapply(colnames(train[,-1]),dickey)
+seriesDetails
 ```
 
 ```{r}
@@ -46,55 +47,82 @@ library(data.table)
 #This is based on the appendix of the paper and on the authors choices of what to apply
 
 seriesDetails$preparation = case_when(
-  seriesDetails$units %in% c("3-Month Annualized Percent Change","Percent","Percent Change at Annual Rate","Percent of Capacity" ) 
-  | grepl("Nonsupervisory Employees: Manufacturing",seriesDetails$title) ~ "Nothing",
-  grepl("Consumer Price",seriesDetails$title) 
-  | grepl("Hourly Earnings", seriesDetails$title) ~ "Second Difference of Logarithm",
-  grepl("Index",seriesDetails$units) 
-  | grepl("Thousands",seriesDetails$units) 
-  | seriesDetails$units %in% "Millions of Dollars" 
-  | grepl("Personal Consumption",seriesDetails$title) ~ "First Difference of Logarithm",
+  seriesDetails$units %in% c("3-Month Annualized Percent Change","Percent","Percent Change at Annual Rate","Percent of Capacity" ) ~ "Nothing",
+  grepl("Nonsupervisory Employees: Manufacturing",seriesDetails$title) ~ "Nothing",
+  grepl("Trade Balance", seriesDetails$title) ~ "First Difference",
+  grepl("Consumer Price",seriesDetails$title) ~ "Second Difference of Logarithm",
+  grepl("Hourly Earnings", seriesDetails$title) ~ "Second Difference of Logarithm",
+  grepl("Index",seriesDetails$units) ~ "First Difference of Logarithm",
+  grepl("Thousands",seriesDetails$units) ~"First Difference of Logarithm",
+  seriesDetails$units %in% "Millions of Dollars" ~ "First Difference of Logarithm",
+  grepl("Personal Consumption",seriesDetails$title) ~ "First Difference of Logarithm",
   TRUE ~ "Second Difference of Logarithm"
 )
+
 dt = as.data.table(seriesDetails)
 setindex(dt, "id")
 
-dt[id %in% "AWHI"]$preparation
-dt
+
+
 
 firstDifferenceLog = function(x){
   tmp = diff(log(x), lag = 1)
-  
+  tmp[-1]
 }
 
 secondDifferenceLog = function(x){
   tmp = diff(log(x), lag = 1, differences = 2)
+  tmp
 }
+
+
+
 
 prepare = function(data,lookup){
+  tmp = data[,-1]
   
+  res = sapply(colnames(tmp), function (x) if(lookup[id %in% x]$preparation == "First Difference of Logarithm"){
+    firstDifferenceLog(tmp[,x])
+  }else{
+    if(lookup[id %in% x]$preparation == "Second Difference of Logarithm"){
+      secondDifferenceLog(tmp[,x])
+    }else{
+      if(lookup[id %in% x]$preparation == "First Difference"){
+        diff(tmp[,x],lag=1)[-1]
+      }else{
+        tmp[,x][-c(1,2)]
+      }
+      
+    }
+  })
+  data=data[-c(1,2),]
+  data[,-1] = res
+  data
 }
 
+trainprepared = prepare(train,dt)
 
-#will no longer be used:
+#check if there is any time series that fails the dickey fuller test
+any(sapply(colnames(trainprepared[,-1]),dickey)==TRUE)
 
-#calculates the change, adds a zero in the front to keep vector length
-#getVectorPercentageChange = function(x){
-#  c(0,(diff(x,lag = 1)/x[1:length(x)-1]))
-#}
+trainprepared
 
-#train[,-1] = apply(train[,-1],2,getVectorPercentageChange)
-
+ggplot(data=trainprepared,
+       aes(x=date))  + geom_smooth(aes(y = `S&P500`), colour="blue",span=0.1) + geom_smooth(aes(y = GDAXI), colour = "red", span=0.1) + geom_smooth(aes(y = IPMAN), colour = "cyan", span=0.1)
 
 ```
 
 ```{r}
 #center and scale
-unscaled_train = train
-scaledtrain = scale(train[,-1])
-train[,-1] = scaledtrain
-scaledtrain = train
+unscaled_train = trainprepared
+scaledtrain = scale(trainprepared[,-1])
+trainprepared[,-1] = scaledtrain
+scaledtrain = trainprepared
 save(scaledtrain, file="prepareddataSC.RData")
 save(unscaled_train, file = "prepareddata.RData")
+
+ggplot(data=scaledtrain,
+       aes(x=date))  + geom_smooth(aes(y = `S&P500`), colour="blue",span=0.1) + geom_smooth(aes(y = GDAXI), colour = "red", span=0.1) + geom_smooth(aes(y = BOPGSTB), colour = "cyan", span=0.1)
+
 ```
 
