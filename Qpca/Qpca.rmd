@@ -10,6 +10,10 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ```{r}
 library("MASS")
+<<<<<<< HEAD
+=======
+library("tseries")
+>>>>>>> 1e85d2ea93ba008276eee1ab2fb729870ca9c27a
 library("xts")
 load("../Qprepare/prepareddata.RData")
 load("../Qprepare/prepareddataSC.RData")
@@ -22,11 +26,17 @@ train[,1] = as.POSIXct(train[,1])
 dates = train[,1]
 
 # probably unnecessary!!!
+<<<<<<< HEAD
 end_date = as.POSIXct("2015-01-01 01:00:00 CET")
 last_known_data = which(dates == end_date)-1
 origin = "1970-01-01 00:00:00"
 
 x_raw = xts(train[,-1], order.by = train[,1])
+=======
+end_date = as.POSIXct("2015-01-01")
+
+x = xts(train[,-1], order.by = train[,1])
+>>>>>>> 1e85d2ea93ba008276eee1ab2fb729870ca9c27a
 # Only use data until december 2014 to select the model
 x.sample = x_raw['/2014-12-01']
 y.sample = (x.sample$`S&P500`)
@@ -75,6 +85,7 @@ for(i in 1:5){
     }
   }
 }
+<<<<<<< HEAD
 # print the full line of the optimal DI model
 DI_model_select = model_select[which(model_select$BIC == min(model_select[model_select$AR == 0,"BIC"])),]
 DI_model_select
@@ -82,12 +93,32 @@ DI_model_select
 # print the full line of the optimal DI-AR model
 DI_AR_model_select = model_select[which(model_select$BIC == min(model_select[model_select$AR > 0,"BIC"])),]
 DI_AR_model_select
+=======
+# print the full line of the optimal model
+min(model_select$BIC)
+
+
+
+# model select AR(p)
+
+model_select_ar = data.frame(t(c(0,0)))
+names(model_select_ar) = c("AR", "BIC")
+for(p in 1:10){
+  
+  ar_model = lm(y.sample ~ lag(y.sample, k = c(1:p)))
+  
+  bic = BIC(ar_model)
+  model_select_ar = rbind(model_select_ar, c(p, round(bic,2)))
+}
+model_select_ar
+>>>>>>> 1e85d2ea93ba008276eee1ab2fb729870ca9c27a
 
 ```
 
 # Forecasting
 ```{R}
 library("forecast") # necessary??
+<<<<<<< HEAD
 
 predictions = data.frame(t(c(0,0,0)))
 names(predictions) = c("date", "y_hat_DI", "y_hat_DI_AR")
@@ -136,6 +167,41 @@ RMSE
 
 ```
 
+=======
+
+predictions = vector()
+h = 1
+
+# BETTER USE FUNCTION forecast FOR h-step AHEAD FORECASTS INSTEAD OF predict
+
+for(i in (0:25)){
+  # get diffusion indexes and estimate model
+  #x = train[1:(275+i),-1]
+  x = train[1:(275+i),]
+  y = as.ts(x$`S&P500`)
+  pca_data = prcomp(x,
+                  center = T,
+                  scale. = T)
+  diff_index = as.ts(pca_data$x[,1:5])
+  dat = (lag(diff_index[1:(273+i),1],k = 2))
+  #model = lm(y[1:(273+i)] ~ PC1, data=dat)
+  model = lm(y[1:(273+i)] ~ dat)
+  summary(model)
+  # make 1-step ahead prediction for new data
+  dat_new = as.data.frame(lag(diff_index[1:(274+i),],k = 1))
+  y_hat =  predict(model, dat_new)
+  test 
+  
+  predictions[i+1] = tail(y_hat, n=1)
+}
+summary(model)
+
+# RMSE
+RMSE = sum(sqrt((y[274:299] - predictions)^2)) /length(predictions)
+
+```
+
+>>>>>>> 1e85d2ea93ba008276eee1ab2fb729870ca9c27a
 
 
 ```{R}
