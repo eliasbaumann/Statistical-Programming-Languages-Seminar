@@ -10,41 +10,137 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ```{r}
 library("MASS")
+library("tseries")
+library("xts")
 load("../Qprepare/prepareddata.RData")
+load("../Qprepare/prepareddataSC.RData")
 
+# first row of train only contains zeros!
+train = unscaled_train
 
 # Format data into POSIXct 
 train[,1] = as.POSIXct(train[,1])
-end_date = as.POSIXct("2015-01-01")
-# Only use data until december 2014 to select the model
-x = train[train$date < end_date,]
-y = x$`S&P500`
+dates = train[,1]
 
-pca_data = prcomp(x[,-1],
+# probably unnecessary!!!
+end_date = as.POSIXct("2015-01-01")
+
+x = xts(train[,-1], order.by = train[,1])
+# Only use data until december 2014 to select the model
+x.sample = x_raw['/2014-12-01']
+y.sample = (x.sample$`S&P500`)
+
+
+#Extract PCAs
+pca_data = prcomp(x.sample,
                   center = T,
                   scale. = T)
 
 summary(pca_data)
 plot(pca_data, type = "l")
 
+# stores the first five PCAs in an xts object
+diff_index = xts(pca_data$x[,1:5], order.by = dates[1:275])
+```
+# Model Selection
+
+```{R}
 # Model selection
+# provides a data.frame to store the results of the model selection process
+#library("dynlm")
+model_select = data.frame(t(c(0,0,0,0)))
+names(model_select) = c("DF", "lags", "AR", "BIC")
 
-#gets the first three PCAs
-z = as.matrix(pca_data$rotation[,1:10])
-# get rid of the data column
-x = as.matrix(x[,-1])
+for(i in 1:5){
+  for(j in 1:8){
+    for(l in 1:9){
+      diff_2 = ifelse(i > 1,1,0) * diff_index[,2] 
+      diff_3 = ifelse(i > 2,1,0) * diff_index[,3] 
+      diff_4 = ifelse(i > 3,1,0) * diff_index[,4] 
+      diff_5 = ifelse(i > 4,1,0) * diff_index[,5]
+      ar_y = ifelse(l < 2, 0, 1) * y.sample
+     
+      model = lm(y.sample ~ lag(diff_index[,1],k=c(1:j)) + 
+                            lag(ar_y, k=c(1:(l-1))) +
+                            lag(diff_2,k=c(1:j)) +
+                            lag(diff_3,k=c(1:j)) +
+                            lag(diff_4,k=c(1:j)) +
+                            lag(diff_5,k=c(1:j)), 
+                            na.action = na.omit)
 
-diff_index = x %*% z
+      bic = BIC(model)
+      # append this to dataframe
+      model_select = rbind(model_select, c(i,j,(l-1), round(bic,2)))
+    }
+  }
+}
+# print the full line of the optimal model
+min(model_select$BIC)
+
+
+
+# model select AR(p)
+
+model_select_ar = data.frame(t(c(0,0)))
+names(model_select_ar) = c("AR", "BIC")
+for(p in 1:10){
+  
+  ar_model = lm(y.sample ~ lag(y.sample, k = c(1:p)))
+  
+  bic = BIC(ar_model)
+  model_select_ar = rbind(model_select_ar, c(p, round(bic,2)))
+}
+model_select_ar
+
+```
+
+# Forecasting
+```{R}
+library("forecast") # necessary??
+
+predictions = vector()
+h = 1
+
+# BETTER USE FUNCTION forecast FOR h-step AHEAD FORECASTS INSTEAD OF predict
+
+for(i in (0:25)){
+  # get diffusion indexes and estimate model
+  #x = train[1:(275+i),-1]
+  x = train[1:(275+i),]
+  y = as.ts(x$`S&P500`)
+  pca_data = prcomp(x,
+                  center = T,
+                  scale. = T)
+  diff_index = as.ts(pca_data$x[,1:5])
+  dat = (lag(diff_index[1:(273+i),1],k = 2))
+  #model = lm(y[1:(273+i)] ~ PC1, data=dat)
+  model = lm(y[1:(273+i)] ~ dat)
+  summary(model)
+  # make 1-step ahead prediction for new data
+  dat_new = as.data.frame(lag(diff_index[1:(274+i),],k = 1))
+  y_hat =  predict(model, dat_new)
+  test 
+  
+  predictions[i+1] = tail(y_hat, n=1)
+}
+summary(model)
+
+# RMSE
+RMSE = sum(sqrt((y[274:299] - predictions)^2)) /length(predictions)
+
+```
+
+
+
+```{R}
 a = lm(y ~ 0 + lag(diff_index[,1],-1) + lag(diff_index[,2],-1) + lag(diff_index[,3],-1) + lag(diff_index[,4],-1) + lag(diff_index[,5],-1) + lag(diff_index[,6],-1) + lag(diff_index[,7],-1) + lag(diff_index[,8],-1) + lag(diff_index[,9],-1) + lag(diff_index[,10],-1))
-b = lm(y ~ 0 + lag(y,12))
+b = dynlm(y ~  L(y,12))
 summary(b)
-y[1:10]
-
-summary(a)
-
 plot(x[,1],y, type = "l") + abline(b, col="red")
 
 BIC(a)
+
+# Use acf() to determine the lags for the AR() model
 
 ```
 
