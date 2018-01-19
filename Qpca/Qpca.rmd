@@ -51,7 +51,6 @@ diff_index = xts(pca_data$x[,1:5], order.by = dates[1:275])
 model_select = data.frame(t(c(0,0,0,0)))
 names(model_select) = c("DF", "lags", "AR", "BIC")
 
-h = 3
 for(i in 1:5){
   for(j in 1:8){
     for(l in 1:9){
@@ -61,12 +60,12 @@ for(i in 1:5){
       diff_5 = ifelse(i > 4,1,0) * diff_index[,5]
       ar_y = ifelse(l < 2, 0, 1) * y.sample
      
-      model = lm(y.sample ~ lag(diff_index[,1],k=j) + 
-                            lag(ar_y, k=(l-1)) +
-                            lag(diff_2,k=j) +
-                            lag(diff_3,k=j) +
-                            lag(diff_4,k=j) +
-                            lag(diff_5,k=j), 
+      model = lm(y.sample ~ lag(diff_index[,1],k=c(1:j)) + 
+                            lag(ar_y, k=c(1:(l-1))) +
+                            lag(diff_2,k=c(1:j)) +
+                            lag(diff_3,k=c(1:j)) +
+                            lag(diff_4,k=c(1:j)) +
+                            lag(diff_5,k=c(1:j)), 
                             na.action = na.omit)
 
       bic = BIC(model)
@@ -75,9 +74,24 @@ for(i in 1:5){
     }
   }
 }
-
 # print the full line of the optimal model
 min(model_select$BIC)
+
+
+
+# model select AR(p)
+
+model_select_ar = data.frame(t(c(0,0)))
+names(model_select_ar) = c("AR", "BIC")
+for(p in 1:10){
+  
+  ar_model = lm(y.sample ~ lag(y.sample, k = c(1:p)))
+  
+  bic = BIC(ar_model)
+  model_select_ar = rbind(model_select_ar, c(p, round(bic,2)))
+}
+model_select_ar
+
 ```
 
 # Forecasting
