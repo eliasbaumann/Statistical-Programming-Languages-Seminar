@@ -1,0 +1,62 @@
+---
+title: "Qforecasting"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Forecasting
+```{R}
+
+predictions = data.frame(t(c(0,0,0,0)))
+names(predictions) = c("date", "y_hat_DI", "y_hat_DI_AR", "y_hat_AR")
+h = 1
+
+
+# put everything in the parentheses {} into a function and then sapply (0:23) over the function 
+for(i in (0:23)){
+  # get diffusion indexes and estimate model
+  x = x_raw[1:(last_known_data +i),] 
+  y = x$`S&P500`
+  pca_data = prcomp(x,
+                  center = T,
+                  scale. = T)
+  diff_index = xts(pca_data$x[,1:5], order.by = dates[1:(last_known_data +i)] )
+  
+  dat = data.frame(date=index(diff_index), coredata(lag(diff_index[,1], k =1)))
+  dat$y = y
+  dat$y_lag1 = lag(y, k =1)
+  dat_new = data.frame(date=dates[(last_known_data +i+1)], tail(diff_index[,1], n = 1),y=NA, y_lag1=tail(dat$y, n = 1), row.names = last_known_data+i+1)
+  dat = rbind(dat,dat_new)
+  DI_model = lm(y ~ PC1, data=dat[1:(last_known_data +i),])
+  DI_AR_model = lm(y ~ PC1 + y_lag1, data= dat[1:(last_known_data +i),])
+  AR_model = lm(y ~ y_lag1, data= dat[1:(last_known_data +i),])
+  
+  # make 1-step ahead prediction for new data
+  y_hat_DI =  predict(DI_model, newdata = tail(dat, n=1))
+  y_hat_DI_AR =  predict(DI_AR_model, newdata = tail(dat, n=1))
+  y_hat_AR = predict(AR_model, newdata = tail(dat, n=1))
+  
+  predictions[i+1,] = c(date=dates[(last_known_data +i+1)], y_hat_DI , y_hat_DI_AR, y_hat_AR)
+}
+
+predictions[,1] = as.POSIXct(predictions[,1], origin = origin)
+
+
+
+z = predictions[1:23,]
+z$y = as.numeric(y["2015-01-01/"])
+
+{plot(z$date, z$y)
+points(z$date, z$y_hat_DI, pch=1, ,col ="red")
+points(z$date, z$y_hat_DI_AR, pch=2, ,col ="blue")
+points(z$date, z$y_hat_AR, pch=3, ,col ="green")}
+z
+# RMSE
+RMSE = sum(sqrt((z$y - z$y_hat_DI_AR)^2)) /length(z$y_hat_DI_AR)
+RMSE
+sum(sqrt((z$y - z$y_hat_AR)^2)) /length(z$y_hat_AR)
+
+```
