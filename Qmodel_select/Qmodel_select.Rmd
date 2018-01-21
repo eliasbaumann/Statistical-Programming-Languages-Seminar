@@ -8,9 +8,15 @@ knitr::opts_chunk$set(echo = TRUE)
 ```
 
 ```{R}
+load("../Qpca/diff_index.RData")
+load("../Qpca/x.sample.RData")
+load("../Qpca/y.sample.RData")
+
 # Model selection
 # provides a data.frame to store the results of the model selection process
 #library("dynlm")
+
+# stores the first five PCAs in an xts object
 model_select = data.frame(t(c(0,0,0,0)))
 names(model_select) = c("DF", "lags", "AR", "BIC")
 
@@ -45,4 +51,20 @@ DI_model_select
 DI_AR_model_select = model_select[which(model_select$BIC == min(model_select[model_select$AR > 0,"BIC"])),]
 DI_AR_model_select
 
+# AR model selection
+
+AR_model = function(p,y){
+  model = lm(y ~ lag(y, k = c(1:p)))
+  bic = BIC(model)
+  return(c(p, bic))
+}
+
+AR_model_select = sapply(1:8, AR_model, y = y.sample)
+AR_model_select = c(0,0, AR_model_select[,which(min(AR_model_select[2,]) == AR_model_select[2,])])
+
+
+model_sel = rbind(DI_model_select, DI_AR_model_select, AR_model_select) 
+row.names(model_sel) = c("DI_model", "DI_AR_model", "AR_model")
+
+save(model_sel, file = "model_sel.RData")
 ```

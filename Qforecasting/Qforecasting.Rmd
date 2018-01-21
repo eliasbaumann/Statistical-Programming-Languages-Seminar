@@ -9,10 +9,23 @@ knitr::opts_chunk$set(echo = TRUE)
 
 # Forecasting
 ```{R}
+library("xts")
+load("../Qprepare/prepareddata.RData")
+load("../Qprepare/prepareddataSC.RData")
+load("../Qmodel_select/model_sel.RData")
+
+train = unscaled_train
+train[,1] = as.POSIXct(train[,1])
+x_raw = xts(train[,-1], order.by = train[,1])
 
 predictions = data.frame(t(c(0,0,0,0)))
 names(predictions) = c("date", "y_hat_DI", "y_hat_DI_AR", "y_hat_AR")
 h = 1
+
+dates = train[,1]
+end_date = as.POSIXct("2015-01-01 01:00:00 CET")
+last_known_data = which(dates == end_date)-1
+
 
 
 # put everything in the parentheses {} into a function and then sapply (0:23) over the function 
@@ -46,17 +59,14 @@ predictions[,1] = as.POSIXct(predictions[,1], origin = origin)
 
 
 
-z = predictions[1:23,]
-z$y = as.numeric(y["2015-01-01/"])
+forecasts = predictions[1:23,]
+forecasts$y = as.numeric(y["2015-01-01/"])
 
-{plot(z$date, z$y)
-points(z$date, z$y_hat_DI, pch=1, ,col ="red")
-points(z$date, z$y_hat_DI_AR, pch=2, ,col ="blue")
-points(z$date, z$y_hat_AR, pch=3, ,col ="green")}
-z
-# RMSE
-RMSE = sum(sqrt((z$y - z$y_hat_DI_AR)^2)) /length(z$y_hat_DI_AR)
-RMSE
-sum(sqrt((z$y - z$y_hat_AR)^2)) /length(z$y_hat_AR)
+{plot(forecasts$date, forecasts$y)
+points(forecasts$date, forecasts$y_hat_DI, pch=1, ,col ="red")
+points(forecasts$date, forecasts$y_hat_DI_AR, pch=2, ,col ="blue")
+points(forecasts$date, forecasts$y_hat_AR, pch=3, ,col ="green")}
+forecasts
+save(forecasts, file="forecasts.RData")
 
 ```

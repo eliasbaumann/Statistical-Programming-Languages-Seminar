@@ -40,8 +40,11 @@ pca_data = prcomp(x.sample,
 summary(pca_data)
 plot(pca_data, type = "l")
 
-# stores the first five PCAs in an xts object
-diff_index = xts(pca_data$x[,1:5], order.by = dates[1:275])
+diff_index = xts(pca_data$x[,1:5], order.by = dates[1:273])
+
+save(diff_index, file = "diff_index.RData")
+save(x.sample, file = "x.sample.RData")
+save(y.sample, file = "y.sample.RData")
 ```
 # Model Selection
 

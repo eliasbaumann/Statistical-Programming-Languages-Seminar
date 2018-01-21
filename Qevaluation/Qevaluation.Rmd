@@ -1,0 +1,22 @@
+---
+title: "Qevaluation"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Evaluation of model performance
+```{r}
+library(forecast)
+load("../Qforecasting/forecasts.RData")
+
+
+# RMSE
+RMSE = function(y,y_hat){sum(sqrt((y - y_hat)^2)) /length(y_hat)}
+RMSE
+
+dm.test()
+```
+
