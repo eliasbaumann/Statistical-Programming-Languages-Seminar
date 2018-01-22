@@ -9,11 +9,48 @@ knitr::opts_chunk$set(echo = TRUE)
 
 
 ```{r}
-load("../Qdataprep/data.RData")
+load("../Qprepare/prepareddata.RData")
 train
 if(!require("forecast")) install.packages("forecast"); library("forecast")
 if(!require("tseries")) install.packages("tseries"); library("tseries")
+```
+```{r}
 
+library("MASS")
+library("tseries")
+library("xts")
+load("../Qprepare/prepareddata.RData")
+load("../Qprepare/prepareddataSC.RData")
+
+# first row of train only contains zeros!
+train = unscaled_train
+
+# Format data into POSIXct 
+train[,1] = as.POSIXct(train[,1])
+dates = train[,1]
+
+# probably unnecessary!!!
+end_date = as.POSIXct("2015-01-01")
+
+x = xts(train[,-1], order.by = train[,1])
+# Only use data until december 2014 to select the model
+x.sample = x_raw['/2014-12-01']
+y.sample = (x.sample$`S&P500`)
+
+# model select AR(p)
+
+model_select_ar = data.frame(t(c(0,0)))
+names(model_select_ar) = c("AR", "BIC")
+for(p in 1:10){
+  
+  ar_model = lm(y.sample ~ lag(y.sample, k = c(1:p)))
+  
+  bic = BIC(ar_model)
+  model_select_ar = rbind(model_select_ar, c(p, round(bic,2)))
+}
+model_select_ar
+
+```
 
 #str(train)
 #myts <- ts(train$`S&P500`, start=c(1992, 2), end=c(2017, 1), frequency=12) 
@@ -24,25 +61,32 @@ if(!require("tseries")) install.packages("tseries"); library("tseries")
 fit = auto.arima(train$`S&P500`, seasonal=FALSE)
 fit_w_seasonality = auto.arima(train$`S&P500`, seasonal=TRUE)
 fit_w_seasonality
-tsdisplay(residuals(fit), lag.max=10, main='(0,0,0) Model Residuals')
+tsdisplay(residuals(fit), lag.max=10, main='(1,0,0) Model Residuals')
 
-fit2 = arima(train$`S&P500`, order=c(0,0,8))
+fit2 = arima(train$`S&P500`, order=c(1,0,0))
 fit2
-tsdisplay(residuals(fit), lag.max=10, main='(0,0,8) Model Residuals')
 
-fcast <- forecast(fit2, h=24)
+predict(train$`S&P500`,267:300)
+
+fcast <- forecast(fit2, h=1)
 plot(fcast)
 
 hold <- window(ts(train$`S&P500`), start=276)
 
-fit_no_holdout = arima(ts(train$`S&P500`[-c(276:300)]), order=c(0,0,8))
+fit_no_holdout = arima(ts(train$`S&P500`[-c(276:300)]), order=c(1,0,0))
 
 fcast_no_holdout <- forecast(fit_no_holdout,h=24)
 plot(fcast_no_holdout, main=" ")
-lines(ts(train$`S&P500`))
+abline(ts(train$`S&P500`))
 
-
-
+for(i in  0:10){
+    #fit = arima(train$`S&P500`, order=c(i, 0, 0))
+    fit = arima(myts, order=c(i, 0, 0))
+    BIC[i]= BIC(fit)
+    }
+fit = arima(train$`S&P500`, order=c(1, 0, 0))
+fit   
+BIC(fit)
 
 ```
 

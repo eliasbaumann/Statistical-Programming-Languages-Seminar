@@ -18,9 +18,12 @@ load("../Qpca/y.sample.RData")
 # stores the first five PCAs in an xts object
 model_select = data.frame(t(c(0,0,0,0)))
 names(model_select) = c("DF", "lags", "AR", "BIC")
-
+#all_models = list(list(list()))
+all_models = list()
 for(i in 1:5){
+    jlist = list()
   for(j in 1:8){
+    llist = list()
     for(l in 1:9){
       diff_2 = ifelse(i > 1,1,0) * diff_index[,2] 
       diff_3 = ifelse(i > 2,1,0) * diff_index[,3] 
@@ -39,11 +42,14 @@ for(i in 1:5){
       bic = BIC(model)
       # append this to dataframe
       model_select = rbind(model_select, c(i,j,(l-1), round(bic,2)))
+      llist[l] = model
     }
+    jlist[j] = list(llist)
   }
+  all_models[i] = list(jlist)
 }
 # print the full line of the optimal DI model
-DI_model_select = model_select[which(model_select$BIC == min(model_select[model_select$AR == 0,"BIC"])),]
+DI_model_select = model_select[which(model_select$BIC == min(model_select[model_select$AR == 0 & model_select$DF > 0,"BIC"])),]
 
 # print the full line of the optimal DI-AR model
 DI_AR_model_select = model_select[which(model_select$BIC == min(model_select[model_select$AR > 0,"BIC"])),]
@@ -65,4 +71,6 @@ row.names(model_sel) = c("DI_model", "DI_AR_model", "AR_model")
 model_sel
 
 save(model_sel, file = "model_sel.RData")
+
+all_models[[1]][[4]][[1]]
 ```

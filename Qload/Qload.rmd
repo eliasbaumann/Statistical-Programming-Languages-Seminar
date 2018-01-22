@@ -23,6 +23,15 @@ getJsonData = function(x){
   series_id=paste("series_id=",x,sep="")
   
   fromJSON(paste(connection,series_id,api_key,file_type,observation_start,observation_end, sep = ""))
+  
+}
+
+getJsonValues = function(x){
+  getJsonData(x)$observations$value
+}
+
+getSeriesValues = function(x){
+  getSeriesInfo(x)$seriess
 }
 
 getSeriesInfo = function(x){
@@ -39,24 +48,18 @@ createFeatureMatrix = function(x){
   res$value = as.numeric(res$value)
   res$date = as.Date(res$date)
   colnames(res) = c("date",x[1])
-  
-  for(i in x[2:length(x)]){
-    tmp = getJsonData(i)
-    res[i]=as.numeric(tmp$observations$value) 
-    }
+  res = cbind(res,as.data.frame(sapply(x[-1], getJsonValues)))
   res
 }
+
+
 
 createPrepTable = function(x){
   columnnames = colnames(getSeriesInfo(x[1])$seriess)[c(1,4,5,6,7,9,11)]
   res = matrix(nrow=length(x)+1,ncol = length(columnnames))
   
   res[1,] = columnnames
-  for(i in seq_along(x)){
-    tmp = getSeriesInfo(x[i])$seriess
-    res[i+1,] = as.vector(unlist(tmp[columnnames]))
-    
-  }
+  res[-1,] = t(sapply(x,function(x) as.vector(unlist(getSeriesValues(x)[columnnames]))))
   res
 }
 
@@ -80,7 +83,10 @@ seriesDetails = rbind(preppedTable,df)
 seriesDetails$id = as.character(seriesDetails$id)
 seriesDetails = seriesDetails[order(seriesDetails$id),]
 
+
 train = createFeatureMatrix(series_ids)
+train[-1] = sapply(train[-1],function(x) as.numeric(as.character(x)))
+
 
 train["GDAXI"] = read.csv("^GDAXI.csv")$Adj.Close
 train["HSI"] = read.csv("^HSI.csv")$Adj.Close

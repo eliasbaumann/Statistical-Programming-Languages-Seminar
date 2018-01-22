@@ -15,38 +15,35 @@ load("../Qprepare/prepareddataSC.RData")
 load("../Qmodel_select/model_sel.RData")
 origin = "1970-01-01 00:00:00"
 
-train = unscaled_train
+train = scaledtrain
 train[,1] = as.POSIXct(train[,1])
 x_raw. = xts(train[,-1], order.by = train[,1])
 
 predictions = data.frame(t(c(0,0,0,0)))
 names(predictions) = c("date", "y_hat_DI", "y_hat_DI_AR", "y_hat_AR")
-h = 1
 
 dates. = train[,1]
 end_date = as.POSIXct("2015-01-01 01:00:00 CET")
 last_known_data. = which(dates. == end_date)-1
 
-
-
 # put everything in the parentheses {} into a function and then sapply (0:23) over the function 
-# for(i in (0:23))
+
 predict_multiple  <-function(i, x_raw = x_raw., last_known_data = last_known_data., dates = dates.){
   # get diffusion indexes and estimate model
   x = x_raw[1:(last_known_data +i),] 
   y = x$`S&P500`
   pca_data = prcomp(x,
-                  center = T,
-                  scale. = T)
+                  center = F,
+                  scale. = F)
   diff_index = xts(pca_data$x[,1:5], order.by = dates[1:(last_known_data +i)] )
   
-  dat = data.frame(date=index(diff_index), coredata(lag(diff_index[,1], k =1)))
+  dat = data.frame(date=index(diff_index), lag(diff_index[,1], k =1), lag(diff_index[,1], k =2), lag(diff_index[,1], k =3), lag(diff_index[,1], k =4))
   dat$y = y
   dat$y_lag1 = lag(y, k =1)
-  dat_new = data.frame(date=dates[(last_known_data +i+1)], tail(diff_index[,1], n = 1),y=NA, y_lag1=tail(dat$y, n = 1), row.names = last_known_data+i+1)
+  dat_new = data.frame(date=dates[(last_known_data +i+1)], diff_index[(last_known_data +i),1], diff_index[(last_known_data +i -1),1], ... = diff_index[(last_known_data +i-2),1],diff_index[(last_known_data +i-3),1],y=NA, y_lag1=tail(dat$y, n = 1), row.names = last_known_data+i+1)
   dat = rbind(dat,dat_new)
-  DI_model = lm(y ~ PC1, data=dat[1:(last_known_data +i),])
-  DI_AR_model = lm(y ~ PC1 + y_lag1, data= dat[1:(last_known_data +i),])
+  DI_model = lm(y ~ PC1 + PC1.1 + PC1.2 + PC1.3, data=dat[1:(last_known_data +i),])
+  DI_AR_model = lm(y ~ PC1 + PC1.1 + PC1.2 + PC1.3 + y_lag1, data= dat[1:(last_known_data +i),])
   AR_model = lm(y ~ y_lag1, data= dat[1:(last_known_data +i),])
 
   # make 1-step ahead prediction for new data

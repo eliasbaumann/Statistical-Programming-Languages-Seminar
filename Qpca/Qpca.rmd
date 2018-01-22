@@ -9,13 +9,12 @@ knitr::opts_chunk$set(echo = TRUE)
 
 
 ```{r}
-library("MASS")
 library("xts")
-load("../Qprepare/prepareddata.RData")
 load("../Qprepare/prepareddataSC.RData")
 
 # first row of train only contains zeros!
-train = unscaled_train
+#train = unscaled_train
+train = scaledtrain
 
 # Format data into POSIXct 
 train[,1] = as.POSIXct(train[,1])
@@ -34,8 +33,8 @@ y.sample = (x.sample$`S&P500`)
 
 #Extract PCAs
 pca_data = prcomp(x.sample,
-                  center = T,
-                  scale. = T)
+                  center = F,
+                  scale. = F)
 
 summary(pca_data)
 plot(pca_data, type = "l")
