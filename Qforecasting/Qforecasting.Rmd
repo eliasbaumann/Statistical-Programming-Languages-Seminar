@@ -13,23 +13,25 @@ library("xts")
 load("../Qprepare/prepareddata.RData")
 load("../Qprepare/prepareddataSC.RData")
 load("../Qmodel_select/model_sel.RData")
+origin = "1970-01-01 00:00:00"
 
 train = unscaled_train
 train[,1] = as.POSIXct(train[,1])
-x_raw = xts(train[,-1], order.by = train[,1])
+x_raw. = xts(train[,-1], order.by = train[,1])
 
 predictions = data.frame(t(c(0,0,0,0)))
 names(predictions) = c("date", "y_hat_DI", "y_hat_DI_AR", "y_hat_AR")
 h = 1
 
-dates = train[,1]
+dates. = train[,1]
 end_date = as.POSIXct("2015-01-01 01:00:00 CET")
-last_known_data = which(dates == end_date)-1
+last_known_data. = which(dates. == end_date)-1
 
 
 
 # put everything in the parentheses {} into a function and then sapply (0:23) over the function 
-for(i in (0:23)){
+# for(i in (0:23))
+predict_multiple  <-function(i, x_raw = x_raw., last_known_data = last_known_data., dates = dates.){
   # get diffusion indexes and estimate model
   x = x_raw[1:(last_known_data +i),] 
   y = x$`S&P500`
@@ -46,27 +48,30 @@ for(i in (0:23)){
   DI_model = lm(y ~ PC1, data=dat[1:(last_known_data +i),])
   DI_AR_model = lm(y ~ PC1 + y_lag1, data= dat[1:(last_known_data +i),])
   AR_model = lm(y ~ y_lag1, data= dat[1:(last_known_data +i),])
-  
+
   # make 1-step ahead prediction for new data
   y_hat_DI =  predict(DI_model, newdata = tail(dat, n=1))
   y_hat_DI_AR =  predict(DI_AR_model, newdata = tail(dat, n=1))
   y_hat_AR = predict(AR_model, newdata = tail(dat, n=1))
   
-  predictions[i+1,] = c(date=dates[(last_known_data +i+1)], y_hat_DI , y_hat_DI_AR, y_hat_AR)
+  #predictions[i+1,] = c(date=dates[(last_known_data +i+1)], y_hat_DI , y_hat_DI_AR, y_hat_AR)
+  predictions = c(date=dates[(last_known_data +i+1)], y_hat_DI , y_hat_DI_AR, y_hat_AR)
+  return(predictions)
 }
 
+predictions = as.data.frame(t(sapply(0:23,predict_multiple)))
 predictions[,1] = as.POSIXct(predictions[,1], origin = origin)
-
-
+colnames(predictions) <- c("date", "y_hat_DI", "y_hat_DI_AR", "y_hat_AR")
 
 forecasts = predictions[1:23,]
-forecasts$y = as.numeric(y["2015-01-01/"])
-
-{plot(forecasts$date, forecasts$y)
-points(forecasts$date, forecasts$y_hat_DI, pch=1, ,col ="red")
-points(forecasts$date, forecasts$y_hat_DI_AR, pch=2, ,col ="blue")
-points(forecasts$date, forecasts$y_hat_AR, pch=3, ,col ="green")}
+forecasts$y = as.numeric(x_raw.$`S&P500`["2015-01-01/2016-11-01"])
 forecasts
+
+{plot(forecasts$date, forecasts$y, type = "p", pch = 20)
+points(forecasts$date, forecasts$y_hat_DI, pch=20, col ="red")
+points(forecasts$date, forecasts$y_hat_DI_AR, pch=20, col ="blue")
+points(forecasts$date, forecasts$y_hat_AR, pch=20, col ="green")}
+
 save(forecasts, file="forecasts.RData")
 
 ```

@@ -14,7 +14,6 @@ load("../Qpca/y.sample.RData")
 
 # Model selection
 # provides a data.frame to store the results of the model selection process
-#library("dynlm")
 
 # stores the first five PCAs in an xts object
 model_select = data.frame(t(c(0,0,0,0)))
@@ -45,11 +44,9 @@ for(i in 1:5){
 }
 # print the full line of the optimal DI model
 DI_model_select = model_select[which(model_select$BIC == min(model_select[model_select$AR == 0,"BIC"])),]
-DI_model_select
 
 # print the full line of the optimal DI-AR model
 DI_AR_model_select = model_select[which(model_select$BIC == min(model_select[model_select$AR > 0,"BIC"])),]
-DI_AR_model_select
 
 # AR model selection
 
@@ -65,6 +62,7 @@ AR_model_select = c(0,0, AR_model_select[,which(min(AR_model_select[2,]) == AR_m
 
 model_sel = rbind(DI_model_select, DI_AR_model_select, AR_model_select) 
 row.names(model_sel) = c("DI_model", "DI_AR_model", "AR_model")
+model_sel
 
 save(model_sel, file = "model_sel.RData")
 ```
