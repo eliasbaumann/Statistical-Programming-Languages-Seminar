@@ -9,17 +9,26 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ```{r}
 library(ggplot2)
+library(gridExtra)
+library(reshape2)
 
 load("../Qload/data.RData")
 #check for NA values
 any(is.na(train))
 
+colnames(train)
 #compare some data 
-ggplot(data=train,
-       aes(x=date))  + geom_smooth(aes(y = `S&P500`), colour="blue",span=0.1) + geom_smooth(aes(y = GDAXI), colour = "red", span=0.1) + geom_smooth(aes(y = IPMAN), colour = "cyan", span=0.1)
+tmp = train[,c("date","INDPRO","S&P500","GDAXI","MANEMP")]
+testy = melt(tmp,measure.vars=colnames(tmp[-1]))
+
+unpreparedplot = ggplot(data=testy, aes(x=date,y=value,colour=variable))+geom_line()+ ggtitle("Unprocessed") + scale_y_log10() + guides(colour = "none")
+
+pdf(file = "InitialDataPlot.pdf",width=12,height=6,paper='special') 
+ggplot(data=testy, aes(x=date,y=value,colour=variable))+geom_line(size=1)+ ggtitle("Unprocessed") + scale_y_log10()
+dev.off()
 
 #check for outliers visually
-boxplot(train[,-1])
+boxplot(train[,-1],varwidth=TRUE)
 
 #since this is macroeconomic data and all outliers are explainable by events or legislations (which can be treated as events as well)
 #data will be centered and scaled so no variable will have a bigger impact than another
@@ -36,7 +45,7 @@ dickey = function(x){
 }
 
 seriesDetails$dickeyres = sapply(colnames(train[,-1]),dickey)
-seriesDetails
+
 ```
 
 ```{r}
@@ -105,24 +114,35 @@ trainprepared = prepare(train,dt)
 #check if there is any time series that fails the dickey fuller test
 any(sapply(colnames(trainprepared[,-1]),dickey)==TRUE)
 
-trainprepared
+tmp = trainprepared[,c("date","INDPRO","S&P500","GDAXI","MANEMP")]
+testy2 = melt(tmp,measure.vars=colnames(tmp[-1]))
 
-ggplot(data=trainprepared,
-       aes(x=date))  + geom_smooth(aes(y = `S&P500`), colour="blue",span=0.1) + geom_smooth(aes(y = GDAXI), colour = "red", span=0.1) + geom_smooth(aes(y = IPMAN), colour = "cyan", span=0.1)
+differencedloggedplot = ggplot(data=testy2, aes(x=date,y=value,colour=variable))+geom_smooth(fill=NA, span=0.1)+ ggtitle("After logarithm and differencing") +guides(colour = "none")
+
 
 ```
 
 ```{r}
 #center and scale
 unscaled_train = trainprepared
-scaledtrain = scale(trainprepared[,-1])
-trainprepared[,-1] = scaledtrain
 scaledtrain = trainprepared
+scaledtrain[,-1]=sapply(trainprepared[,-1],scale)
+
 save(scaledtrain, file="prepareddataSC.RData")
 save(unscaled_train, file = "prepareddata.RData")
 
-ggplot(data=scaledtrain,
-       aes(x=date))  + geom_smooth(aes(y = `S&P500`), colour="blue",span=0.1) + geom_smooth(aes(y = GDAXI), colour = "red", span=0.1) + geom_smooth(aes(y = BOPGSTB), colour = "cyan", span=0.1)
+tmp = scaledtrain[,c("date","INDPRO","S&P500","GDAXI","MANEMP")]
+testy3 = melt(tmp,measure.vars=colnames(tmp[-1]))
 
+scaledplot = ggplot(data=testy3, aes(x=date,y=value,colour=variable))+geom_smooth(fill=NA, span=0.1)+ ggtitle("After centering and scaling")
+
+
+pdf(file = "comparisonAfterPrep.pdf",width=12,height=6,paper='special') 
+grid.arrange(
+  grobs = list(unpreparedplot,differencedloggedplot,scaledplot),
+  widths = c(2.1, 1, 1),
+  layout_matrix = rbind(c(1, 2, 2),
+                        c(3, 3, 3))
+)
+dev.off()
 ```
-

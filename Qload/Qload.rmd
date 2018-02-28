@@ -95,5 +95,8 @@ train["S&P500"] = read.csv("sandp500.csv")$Adj.Close
 
 
 save(list = c("train", "seriesDetails"), file="data.RData")
+
+#This was used for the presentation
+head(as.matrix(train[,c(1,31,74,71,39)]))
 ```
 
