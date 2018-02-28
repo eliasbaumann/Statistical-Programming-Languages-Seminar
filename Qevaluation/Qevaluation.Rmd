@@ -21,9 +21,9 @@ forecasts$e_DI = forecasts$y_hat_DI - forecasts$y
 forecasts$e_DI_AR = forecasts$y_hat_DI_AR - forecasts$y
 forecasts$e_AR = forecasts$y_hat_AR - forecasts$y
 
-dm.test(forecasts$e_DI, forecasts$e_AR, h = 1, power = 2)
-dm.test(forecasts$e_DI_AR, forecasts$e_AR, h = 1, power = 2)
+dm.test(forecasts$e_DI, forecasts$e_AR, h = 1, power = 1)
+dm.test(forecasts$e_DI_AR, forecasts$e_AR, h = 1, power = 1)
+dm.test(c(1,1,1),c(1.000001, 0.999999,1), h = 1 , power = 1)
 
 # DM Test can't reject H_0: no statistical significant difference in the two forecasts
 ```
-

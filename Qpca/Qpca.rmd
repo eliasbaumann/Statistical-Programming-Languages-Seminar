@@ -31,13 +31,16 @@ x.sample = x_raw['/2014-12-01']
 y.sample = (x.sample$`S&P500`)
 
 
-#Extract PCAs
+#Extract PCs
 pca_data = prcomp(x.sample,
                   center = F,
-                  scale. = F)
+                  scale = F)
 
 summary(pca_data)
-plot(pca_data, type = "l")
+#{jpeg('PCAplot.jpg')
+plot(pca_data, type = "l", main = "")
+title(, xlab = "Principal Component")
+#dev.off()}
 
 diff_index = xts(pca_data$x[,1:5], order.by = dates[1:273])
 

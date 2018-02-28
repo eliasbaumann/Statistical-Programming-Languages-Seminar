@@ -64,10 +64,18 @@ forecasts = predictions[1:23,]
 forecasts$y = as.numeric(x_raw.$`S&P500`["2015-01-01/2016-11-01"])
 forecasts
 
-{plot(forecasts$date, forecasts$y, type = "p", pch = 20)
+{jpeg('PCAplot.jpg')
+{plot(forecasts$date, forecasts$y, type = "p", pch = 20, xlab = "Month", ylab = "y-value" )
 points(forecasts$date, forecasts$y_hat_DI, pch=20, col ="red")
-points(forecasts$date, forecasts$y_hat_DI_AR, pch=20, col ="blue")
-points(forecasts$date, forecasts$y_hat_AR, pch=20, col ="green")}
+points(forecasts$date, forecasts$y_hat_DI_AR, pch=20, col ="orange")
+points(forecasts$date, forecasts$y_hat_AR, pch=20, col ="green")
+legend( x="topleft", 
+        legend=c("y","y_hat_DI", "y_hat_DI_AR", "y_hat_AR"),
+        col=c("black","red", "orange", "green"), lwd=1, lty=c(0,0), 
+        pch=c(20) )
+}
+dev.off()}
+
 
 save(forecasts, file="forecasts.RData")
 
