@@ -21,12 +21,14 @@ colnames(train)
 tmp = train[,c("date","INDPRO","S&P500","GDAXI","MANEMP")]
 testy = melt(tmp,measure.vars=colnames(tmp[-1]))
 
-unpreparedplot = ggplot(data=testy, aes(x=date,y=value,colour=variable))+geom_line()+ ggtitle("Unprocessed") + scale_y_log10() + guides(colour = "none")
+unpreparedplot = ggplot(data=testy, aes(x=date,y=value,colour=variable,linetype=variable))+geom_line(size=1)+ ggtitle("Unprocessed") + scale_y_log10() + theme(panel.background = element_rect(fill = 'transparent', colour = 'transparent'))
 
 pdf(file = "InitialDataPlot.pdf",width=12,height=6,paper='special') 
-ggplot(data=testy, aes(x=date,y=value,colour=variable))+geom_line(size=1)+ ggtitle("Unprocessed") + scale_y_log10()
+unpreparedplot
 dev.off()
 
+unpreparedplot = unpreparedplot +theme(legend.position="none")
+unpreparedplot
 #check for outliers visually
 boxplot(train[,-1],varwidth=TRUE)
 
@@ -130,9 +132,7 @@ any(sapply(colnames(trainprepared[,-1]),dickey)==TRUE)
 tmp = trainprepared[,c("date","INDPRO","S&P500","GDAXI","MANEMP")]
 testy2 = melt(tmp,measure.vars=colnames(tmp[-1]))
 
-differencedloggedplot = ggplot(data=testy2, aes(x=date,y=value,colour=variable))+geom_smooth(fill=NA, span=0.1)+ ggtitle("After logarithm and differencing") +guides(colour = "none")
-
-
+differencedloggedplot = ggplot(data=testy2, aes(x=date,y=value,colour=variable,linetype=variable))+geom_smooth(fill=NA, span=0.1)+ ggtitle("After logarithm and differencing") + theme(panel.background = element_rect(fill = 'transparent', colour = 'transparent'),legend.position="none")
 ```
 
 ```{r}
@@ -147,7 +147,8 @@ save(unscaled_train, file = "prepareddata.RData")
 tmp = scaledtrain[,c("date","INDPRO","S&P500","GDAXI","MANEMP")]
 testy3 = melt(tmp,measure.vars=colnames(tmp[-1]))
 
-scaledplot = ggplot(data=testy3, aes(x=date,y=value,colour=variable))+geom_smooth(fill=NA, span=0.1)+ ggtitle("After centering and scaling")
+scaledplot = ggplot(data=testy3, aes(x=date,y=value,colour=variable,linetype=variable))+geom_smooth(fill=NA, span=0.1)+ ggtitle("After centering and scaling") + theme(panel.background = element_rect(fill = 'transparent', colour = 'transparent'))
+
 
 
 pdf(file = "comparisonAfterPrep.pdf",width=12,height=6,paper='special') 
