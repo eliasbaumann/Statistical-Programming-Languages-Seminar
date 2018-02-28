@@ -33,7 +33,7 @@ getJsonValues = function(x){
 getSeriesValues = function(x){
   getSeriesInfo(x)$seriess
 }
-
+#Get info on all Time Series
 getSeriesInfo = function(x){
   connection = "https://api.stlouisfed.org/fred/series?"
   api_key = "&api_key=4c5743e8fb183ff3f7f47ba1ae651683&"
@@ -41,6 +41,15 @@ getSeriesInfo = function(x){
   series_id=paste("series_id=",x,sep="")
   fromJSON(paste(connection,series_id,api_key,file_type, sep = ""))
 }
+
+#Get Data from Stooq
+getStooqData = function(x){
+  connection = "https://stooq.com/q/d/l/?"
+  symbol = paste("s=",x,"&",sep="")
+  remainder = "d1=19920131&d2=20161231&i=m"
+  read.csv(paste(connection,symbol,remainder, sep = ""))
+}
+
 
 #create time series with multiple dimensions
 createFeatureMatrix = function(x){
@@ -53,7 +62,7 @@ createFeatureMatrix = function(x){
 }
 
 
-
+#Create Table for Info on Series
 createPrepTable = function(x){
   columnnames = colnames(getSeriesInfo(x[1])$seriess)[c(1,4,5,6,7,9,11)]
   res = matrix(nrow=length(x)+1,ncol = length(columnnames))
@@ -63,18 +72,18 @@ createPrepTable = function(x){
   res
 }
 
-
+#Read in all names 
 series_ids = as.vector(unlist(read.csv("frednametags.csv",stringsAsFactors = FALSE,header=FALSE)))
 prepTable = createPrepTable(series_ids)
-
+#Create table for Info
 preppedTable = as.data.frame(prepTable[1:length(series_ids)+1,])
 names(preppedTable) = prepTable[1,]
+#Manually enter info for 4 Series where we cannot automatically get this from FRED
+gdaxi = c("GDAXI","German DAX Index","1992-01-31","2016-12-30","Monthly","Index 1987 = 1000","Not Seasonally Adjusted")
+hsi = c("HSI","Hang Seng Index","1992-01-31","2016-12-30","Monthly","Index 1964 = 100","Not Seasonally Adjusted")
+n225 = c("N225","Nikkei 225","1992-01-31","2016-12-30","Monthly","Index Points","Not Seasonally Adjusted") 
+s500 = c("S&P500","Standard & Poor's 500","1992-01-31","2016-12-30","Monthly","Index Points","Not Seasonally Adjusted") 
 
-#[1] "id" "title" "observation_start" "observation_end" "frequency" "units" "seasonal_adjustment"
-gdaxi = c("GDAXI","German DAX Index","1992-01-31","2016-12-31","Monthly","Index 1987 = 1000","Not Seasonally Adjusted")
-hsi = c("HSI","Hang Seng Index","1992-01-31","2016-12-31","Monthly","Index 1964 = 100","Not Seasonally Adjusted")
-n225 = c("N225","Nikkei 225","1992-01-31","2016-12-31","Monthly","Index Points","Not Seasonally Adjusted") 
-s500 = c("S&P500","Standard & Poor's 500","1992-02-01","2017-01-01","Monthly","Index Points","Not Seasonally Adjusted") 
 
 df = as.data.frame(do.call("rbind", list(gdaxi, hsi, n225, s500)))
 names(df) = names(preppedTable)
@@ -83,20 +92,12 @@ seriesDetails = rbind(preppedTable,df)
 seriesDetails$id = as.character(seriesDetails$id)
 seriesDetails = seriesDetails[order(seriesDetails$id),]
 
-
+#Create Time Series from FRED
 train = createFeatureMatrix(series_ids)
 train[-1] = sapply(train[-1],function(x) as.numeric(as.character(x)))
 
-
-train["GDAXI"] = read.csv("^GDAXI.csv")$Adj.Close
-train["HSI"] = read.csv("^HSI.csv")$Adj.Close
-train["N225"] = read.csv("^N225.csv")$Adj.Close
-train["S&P500"] = read.csv("sandp500.csv")$Adj.Close
-
+#Add additional data for DAX,HSI,NIKKEI225,S&P500
+train[c("GDAXI","HSI","N225","S&P500")] = cbind(getStooqData("^dax")$Close,getStooqData("^hsi")$Close,getStooqData("^nkx")$Close,getStooqData("^spx")$Close)
 
 save(list = c("train", "seriesDetails"), file="data.RData")
-
-#This was used for the presentation
-head(as.matrix(train[,c(1,31,74,71,39)]))
 ```
-

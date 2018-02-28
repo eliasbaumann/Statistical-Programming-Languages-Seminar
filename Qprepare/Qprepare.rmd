@@ -36,12 +36,25 @@ boxplot(train[,-1],varwidth=TRUE)
 
 ```{r}
 #Dickey Fuller Test
-library(urca)
+
+criticalValues = qnorm(c(.01,.05,.1)/2)
 
 dickey = function(x){
-  df = ur.df(train[,x],type="none",lags=1)
-  df@teststat[1,1] < df@cval[1,1]
+  #get change values
+  y = diff(train[,x])
+  lag=1
+  #yt-1
+  yt_1 =embed(y,lag+1)[,1]
+
+  #get lagged values
+  ylagged=train[,x][(lag+1):length(y)]
+  #deltaYt-1
+  deltaYt_1 = embed(y,2)[,2]
   
+  #apply linear model to find out if regression coefficient is 1
+  res = summary(lm(yt_1~0+ylagged+deltaYt_1 ))
+  #can we reject that regression coefficient is 1?
+  res$coefficients[1,3] < criticalValues[1]
 }
 
 seriesDetails$dickeyres = sapply(colnames(train[,-1]),dickey)
