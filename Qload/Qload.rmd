@@ -25,11 +25,11 @@ getJsonData = function(x){
   fromJSON(paste(connection,series_id,api_key,file_type,observation_start,observation_end, sep = ""))
   
 }
-
+#get Time Series data
 getJsonValues = function(x){
   getJsonData(x)$observations$value
 }
-
+#Get series information
 getSeriesValues = function(x){
   getSeriesInfo(x)$seriess
 }
@@ -84,7 +84,7 @@ hsi = c("HSI","Hang Seng Index","1992-01-31","2016-12-30","Monthly","Index 1964 
 n225 = c("N225","Nikkei 225","1992-01-31","2016-12-30","Monthly","Index Points","Not Seasonally Adjusted") 
 s500 = c("S&P500","Standard & Poor's 500","1992-01-31","2016-12-30","Monthly","Index Points","Not Seasonally Adjusted") 
 
-
+#add the additional 4 time series from the second data source
 df = as.data.frame(do.call("rbind", list(gdaxi, hsi, n225, s500)))
 names(df) = names(preppedTable)
 

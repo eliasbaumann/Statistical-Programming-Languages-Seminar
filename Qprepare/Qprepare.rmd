@@ -19,26 +19,27 @@ any(is.na(train))
 colnames(train)
 #compare some data 
 tmp = train[,c("date","INDPRO","S&P500","GDAXI","MANEMP")]
-testy = melt(tmp,measure.vars=colnames(tmp[-1]))
+melted = melt(tmp,measure.vars=colnames(tmp[-1]))
 
-unpreparedplot = ggplot(data=testy, aes(x=date,y=value,colour=variable,linetype=variable))+geom_line(size=1)+ ggtitle("Unprocessed") + scale_y_log10() + theme(panel.background = element_rect(fill = 'transparent', colour = 'transparent'))
+
+unpreparedplot = ggplot(data=melted, aes(x=date,y=value,colour=variable,linetype=variable))+geom_line(size=1)+ ggtitle("Unprocessed") + scale_y_log10() + theme(panel.background = element_rect(fill = 'transparent', colour = 'transparent'))
 
 pdf(file = "InitialDataPlot.pdf",width=12,height=6,paper='special') 
 unpreparedplot
 dev.off()
 
 unpreparedplot = unpreparedplot +theme(legend.position="none")
-unpreparedplot
+
 #check for outliers visually
 boxplot(train[,-1],varwidth=TRUE)
 
 #since this is macroeconomic data and all outliers are explainable by events or legislations (which can be treated as events as well)
-#data will be centered and scaled so no variable will have a bigger impact than another
 ```
 
 ```{r}
-#Dickey Fuller Test
+#Augmented Dickey Fuller Test
 
+#First get values to test against:
 criticalValues = qnorm(c(.01,.05,.1)/2)
 
 dickey = function(x){
@@ -59,6 +60,7 @@ dickey = function(x){
   res$coefficients[1,3] < criticalValues[1]
 }
 
+#apply augmented dickey fuller test to all series
 seriesDetails$dickeyres = sapply(colnames(train[,-1]),dickey)
 
 ```
@@ -83,17 +85,18 @@ seriesDetails$preparation = case_when(
   TRUE ~ "Second Difference of Logarithm"
 )
 
+#create lookup
 dt = as.data.table(seriesDetails)
 setindex(dt, "id")
 
 
 
-
+#function for first differencing
 firstDifferenceLog = function(x){
   tmp = diff(log(x), lag = 1)
   tmp[-1]
 }
-
+#function for second differencing
 secondDifferenceLog = function(x){
   tmp = diff(log(x), lag = 1, differences = 2)
   tmp
@@ -101,7 +104,7 @@ secondDifferenceLog = function(x){
 
 
 
-
+#use lookup to figure out what function to apply to data
 prepare = function(data,lookup){
   tmp = data[,-1]
   
@@ -129,10 +132,11 @@ trainprepared = prepare(train,dt)
 #check if there is any time series that fails the dickey fuller test
 any(sapply(colnames(trainprepared[,-1]),dickey)==TRUE)
 
+#plot results
 tmp = trainprepared[,c("date","INDPRO","S&P500","GDAXI","MANEMP")]
-testy2 = melt(tmp,measure.vars=colnames(tmp[-1]))
+melted2 = melt(tmp,measure.vars=colnames(tmp[-1]))
 
-differencedloggedplot = ggplot(data=testy2, aes(x=date,y=value,colour=variable,linetype=variable))+geom_smooth(fill=NA, span=0.1)+ ggtitle("After logarithm and differencing") + theme(panel.background = element_rect(fill = 'transparent', colour = 'transparent'),legend.position="none")
+differencedloggedplot = ggplot(data=melted2, aes(x=date,y=value,colour=variable,linetype=variable))+geom_smooth(fill=NA, span=0.1)+ ggtitle("After logarithm and differencing") + theme(panel.background = element_rect(fill = 'transparent', colour = 'transparent'),legend.position="none")
 ```
 
 ```{r}
@@ -141,13 +145,15 @@ unscaled_train = trainprepared
 scaledtrain = trainprepared
 scaledtrain[,-1]=sapply(trainprepared[,-1],scale)
 
+#save data both scaled and unscaled for different purposes
 save(scaledtrain, file="prepareddataSC.RData")
 save(unscaled_train, file = "prepareddata.RData")
 
 tmp = scaledtrain[,c("date","INDPRO","S&P500","GDAXI","MANEMP")]
-testy3 = melt(tmp,measure.vars=colnames(tmp[-1]))
+melted3 = melt(tmp,measure.vars=colnames(tmp[-1]))
 
-scaledplot = ggplot(data=testy3, aes(x=date,y=value,colour=variable,linetype=variable))+geom_smooth(fill=NA, span=0.1)+ ggtitle("After centering and scaling") + theme(panel.background = element_rect(fill = 'transparent', colour = 'transparent'))
+#create a final plot to see differences between all three plots
+scaledplot = ggplot(data=melted3, aes(x=date,y=value,colour=variable,linetype=variable))+geom_smooth(fill=NA, span=0.1)+ ggtitle("After centering and scaling") + theme(panel.background = element_rect(fill = 'transparent', colour = 'transparent'))
 
 
 
