@@ -1,5 +1,5 @@
-Name of Quantlet: Qload
-Published in: Seminar Paper for Statistical Programming Languages
+Name of Quantlet: 'Qload'
+Published in: 'Statistical programming languages - Student Project on "Macroeconomic Forecasting using Diffusion Indexes"'
 Author: Elias Baumann, Katja Metzger, Josef Lorenz Rumberger
 Description: Loads time series data from two online sources (FRED and stooq).
 Keywords: time-series, market, financial, data acquisition, api
