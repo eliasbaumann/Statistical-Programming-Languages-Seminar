@@ -9,6 +9,7 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ```{r}
 # needed only for package installation or update
+install.packages("yaml")
 library(devtools)
 devtools::install_github("lborke/yamldebugger")
 
