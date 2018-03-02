@@ -22,7 +22,7 @@ allKeywords
 d_init = yaml.debugger.init(getwd(), show_keywords = FALSE)
 qnames = yaml.debugger.get.qnames(d_init$RootPath)
 d_results = yaml.debugger.run(qnames, d_init)
-	
+d_results$possible_pictures
 OverView = yaml.debugger.summary(qnames, d_results, summaryType = "mini")
 ```
 
