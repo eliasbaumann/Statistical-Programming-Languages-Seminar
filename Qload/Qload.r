@@ -94,3 +94,4 @@ train[c("GDAXI", "HSI", "N225", "S&P500")] = cbind(getStooqData("^dax")$Close, g
     getStooqData("^spx")$Close)
 
 save(list = c("train", "seriesDetails"), file = "data.RData")
+write.csv(seriesDetails, file = "seriesDetails.csv")

@@ -38,18 +38,18 @@ criticalValues = qnorm(c(0.01, 0.05, 0.1)/2)
 
 dickey = function(x) {
     # get change values
-    y = diff(train[, x])
+    dy = diff(train[, x])
     lag = 1
-    # yt-1
-    yt_1 = embed(y, lag + 1)[, 1]
+    # dyt
+    dyt = embed(dy, lag + 1)[, 1]
     
     # get lagged values
-    ylagged = train[, x][(lag + 1):length(y)]
+    yt_1 = train[, x][(lag + 1):length(dy)]
     # deltaYt-1
-    deltaYt_1 = embed(y, 2)[, 2]
+    dyt_1 = embed(dy, lag+1)[, 2]
     
     # apply linear model to find out if regression coefficient is 1
-    res = summary(lm(yt_1 ~ 0 + ylagged + deltaYt_1))
+    res = summary(lm(dyt ~ yt_1 - 1 + dYt_1))
     # can we reject that regression coefficient is 1?
     res$coefficients[1, 3] < criticalValues[1]
 }
@@ -131,7 +131,6 @@ scaledtrain[, -1] = sapply(trainprepared[, -1], scale)
 
 # save data 
 save(scaledtrain, file = "prepareddataSC.RData")
-
 
 tmp = scaledtrain[, c("date", "INDPRO", "S&P500", "GDAXI", "MANEMP")]
 melted3 = melt(tmp, measure.vars = colnames(tmp[-1]))
