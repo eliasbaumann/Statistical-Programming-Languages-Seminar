@@ -18,20 +18,20 @@ x_raw = xts(train[, -1], order.by = train[, 1])
 x.sample = x_raw["/2014-12-01"]
 y.sample = (x.sample$`S&P500`)
 
-pca = function(A) {
+pca = function(x) {
     #compute eigen values to create orthogonal matrices U and V
-    ATA  = t(A) %*% A
-    AAT  = A %*% t(A)
-    eig1 = eigen(ATA)
-    eig2 = eigen(AAT)
+    xTx  = t(x) %*% x
+    xxT  = x %*% t(x)
+    eig1 = eigen(xTx)
+    eig2 = eigen(xxT)
     V    = as.matrix(eig1$vectors)
     U    = as.matrix(eig2$vectors)
     
-    dimnames(V) = list(colnames(A), paste0("PC", seq_len(ncol(V))))
+    dimnames(V) = list(colnames(x), paste0("PC", seq_len(ncol(V))))
     #compute sigma values and normalize
-    stdev = sqrt(eig2$values)/sqrt(max(1, nrow(A) - 1))
+    stdev = sqrt(eig2$values)/sqrt(max(1, nrow(x) - 1))
     #compute USigma
-    x     = A %*% V
+    x     = x %*% V
     res   = list(sdev = stdev, rotation = V, x = x)
     res
 }
