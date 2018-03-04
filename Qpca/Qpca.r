@@ -19,23 +19,26 @@ x.sample = x_raw["/2014-12-01"]
 y.sample = (x.sample$`S&P500`)
 
 pca = function(A) {
-    ATA = t(A) %*% A
-    AAT = A %*% t(A)
+    #compute eigen values to create orthogonal matrices U and V
+    ATA  = t(A) %*% A
+    AAT  = A %*% t(A)
     eig1 = eigen(ATA)
     eig2 = eigen(AAT)
-    V = as.matrix(eig1$vectors)
-    U = as.matrix(eig2$vectors)
-    dimnames(V) = list(colnames(A), paste0("PC", seq_len(ncol(V))))
+    V    = as.matrix(eig1$vectors)
+    U    = as.matrix(eig2$vectors)
     
+    dimnames(V) = list(colnames(A), paste0("PC", seq_len(ncol(V))))
+    #compute sigma values and normalize
     stdev = sqrt(eig2$values)/sqrt(max(1, nrow(A) - 1))
-    x = A %*% V
-    res = list(sdev = stdev, rotation = V, x = x)
+    #compute USigma
+    x     = A %*% V
+    res   = list(sdev = stdev, rotation = V, x = x)
     res
 }
 
 # Extract PCAs
 pca_data = pca(x.sample)
-screeplot(pca_data, main = deparse(substitute(pca_data)))
+screeplot(pca_data, main = deparse(substitute(pca_data)),type = "l")
 
 diff_index = xts(pca_data$x[, 1:5], order.by = dates[1:273])
 save(diff_index, file = "diff_index.RData")

@@ -13,7 +13,7 @@ any(is.na(train))
 
 colnames(train)
 # compare some data
-tmp = train[, c("date", "INDPRO", "S&P500", "GDAXI", "MANEMP")]
+tmp    = train[, c("date", "INDPRO", "S&P500", "GDAXI", "MANEMP")]
 melted = melt(tmp, measure.vars = colnames(tmp[-1]))
 
 
@@ -38,13 +38,13 @@ criticalValues = qnorm(c(0.01, 0.05, 0.1)/2)
 
 dickey = function(x) {
     # get change values
-    dy = diff(train[, x])
+    dy  = diff(train[, x])
     lag = 1
     # dyt
     dyt = embed(dy, lag + 1)[, 1]
     
     # get lagged values
-    yt_1 = train[, x][(lag + 1):length(dy)]
+    yt_1  = train[, x][(lag + 1):length(dy)]
     # deltaYt-1
     dyt_1 = embed(dy, lag+1)[, 2]
     
@@ -107,7 +107,7 @@ prepare = function(data, lookup) {
             
         }
     })
-    data = data[-c(1, 2), ]
+    data       = data[-c(1, 2), ]
     data[, -1] = res
     data
 }
@@ -118,7 +118,7 @@ trainprepared = prepare(train, dt)
 any(sapply(colnames(trainprepared[, -1]), dickey) == TRUE)
 
 # plot results
-tmp = trainprepared[, c("date", "INDPRO", "S&P500", "GDAXI", "MANEMP")]
+tmp     = trainprepared[, c("date", "INDPRO", "S&P500", "GDAXI", "MANEMP")]
 melted2 = melt(tmp, measure.vars = colnames(tmp[-1]))
 
 differencedloggedplot = ggplot(data = melted2, aes(x = date, y = value, colour = variable, linetype = variable)) + 
@@ -126,13 +126,13 @@ differencedloggedplot = ggplot(data = melted2, aes(x = date, y = value, colour =
     colour = "transparent"), legend.position = "none")
 
 # center and scale
-scaledtrain = trainprepared
+scaledtrain       = trainprepared
 scaledtrain[, -1] = sapply(trainprepared[, -1], scale)
 
 # save data 
 save(scaledtrain, file = "prepareddataSC.RData")
 
-tmp = scaledtrain[, c("date", "INDPRO", "S&P500", "GDAXI", "MANEMP")]
+tmp     = scaledtrain[, c("date", "INDPRO", "S&P500", "GDAXI", "MANEMP")]
 melted3 = melt(tmp, measure.vars = colnames(tmp[-1]))
 
 # create a final plot to see differences between all three plots
