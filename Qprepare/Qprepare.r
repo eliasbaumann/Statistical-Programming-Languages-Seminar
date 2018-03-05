@@ -36,6 +36,8 @@ boxplot(train[, -1], varwidth = TRUE)
 # First get values to test against:
 criticalValues = qnorm(c(0.01, 0.05, 0.1)/2)
 
+# Augmented Dickey Fuller Test function. 
+# x: input data (a single time series)
 dickey = function(x) {
     # get change values
     dy  = diff(train[, x])

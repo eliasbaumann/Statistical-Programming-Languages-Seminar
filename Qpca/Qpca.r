@@ -18,6 +18,8 @@ x_raw = xts(train[, -1], order.by = train[, 1])
 x.sample = x_raw["/2014-12-01"]
 y.sample = (x.sample$`S&P500`)
 
+#TODO do some tests to check if we can apply pca
+
 pca = function(x) {
     #compute eigen values to create orthogonal matrices U and V
     xTx  = t(x) %*% x
