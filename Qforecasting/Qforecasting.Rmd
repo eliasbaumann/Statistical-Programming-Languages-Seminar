@@ -10,73 +10,72 @@ knitr::opts_chunk$set(echo = TRUE)
 # Forecasting
 ```{R}
 library("xts")
-load("../Qprepare/prepareddata.RData")
 load("../Qprepare/prepareddataSC.RData")
 load("../Qmodel_select/model_sel.RData")
-origin = "1970-01-01 00:00:00"
 
-train = scaledtrain
-train[,1] = as.POSIXct(train[,1])
-x_raw. = xts(train[,-1], order.by = train[,1])
+origin          = "1970-01-01 00:00:00"
+dates           = as.POSIXct(scaledtrain[,1])
+x_raw           = xts(scaledtrain[,-1], order.by = dates)
+predictions     = data.frame(date = "", y_hat_DI = "", y_hat_DI_AR = "", y_hat_AR = "")
+end_date        = as.POSIXct("2015-01-01 01:00:00 CET")
+last_known_data = which(dates == end_date)-1
 
-predictions = data.frame(t(c(0,0,0,0)))
-names(predictions) = c("date", "y_hat_DI", "y_hat_DI_AR", "y_hat_AR")
-
-dates. = train[,1]
-end_date = as.POSIXct("2015-01-01 01:00:00 CET")
-last_known_data. = which(dates. == end_date)-1
-
-# put everything in the parentheses {} into a function and then sapply (0:23) over the function 
-
-predict_multiple  <-function(i, x_raw = x_raw., last_known_data = last_known_data., dates = dates.){
-  # get diffusion indexes and estimate model
-  x = x_raw[1:(last_known_data +i),] 
-  y = x$`S&P500`
-  pca_data = prcomp(x,
-                  center = F,
-                  scale. = F)
-  diff_index = xts(pca_data$x[,1:5], order.by = dates[1:(last_known_data +i)] )
+predict_multiple= function(i){
+    # Constructs Diffusion Indexes, fits a DI, DI_AR and an AR model and uses these models to predict the future monthly return
+    # Input: Integer i
+    # Output: Numeric Vector predictions
+    
+    # get diffusion indexes and estimate model
+    x        = x_raw[1:(last_known_data +i),] 
+    y        = x$`S&P500`
+    pca_data = prcomp(x,
+                    center = F,
+                    scale. = F)
+    # put the diffusion indexes into time series format
+    diff_index = xts(pca_data$x[,1:5], order.by = dates[1:(last_known_data +i)] )
+    # Construct data frame holding all the variables used in the models
+    dat           = data.frame(date=index(diff_index), lag(diff_index[,1], k =c(1:4)), y,  lag(y, k =1))
+    colnames(dat) = c("date","PC1","PC1.1","PC1.2","PC1.3","y","y_lag1")
+    # Construct data frame that contains only the last months data to construct the forecast of the following month
+    dat_new = data.frame(date=dates[(last_known_data +i+1)],
+                         diff_index[(last_known_data +i),1],
+                         diff_index[(last_known_data +i -1),1],
+                         diff_index[(last_known_data +i-2),1],
+                         diff_index[(last_known_data +i-3),1],
+                         y=NA,
+                         y_lag1=tail(dat$y, n = 1),
+                         row.names = last_known_data+i+1)
+    # Fits the models on the known data
+    DI_model    = lm(y ~ PC1 + PC1.1 + PC1.2 + PC1.3, data = dat)
+    DI_AR_model = lm(y ~ PC1 + PC1.1 + PC1.2 + PC1.3 + y_lag1, data = dat)
+    AR_model    = lm(y ~ y_lag1, data = dat)
   
-  dat = data.frame(date=index(diff_index), lag(diff_index[,1], k =1), lag(diff_index[,1], k =2), lag(diff_index[,1], k =3), lag(diff_index[,1], k =4))
-  dat$y = y
-  dat$y_lag1 = lag(y, k =1)
-  dat_new = data.frame(date=dates[(last_known_data +i+1)], diff_index[(last_known_data +i),1], diff_index[(last_known_data +i -1),1], ... = diff_index[(last_known_data +i-2),1],diff_index[(last_known_data +i-3),1],y=NA, y_lag1=tail(dat$y, n = 1), row.names = last_known_data+i+1)
-  dat = rbind(dat,dat_new)
-  DI_model = lm(y ~ PC1 + PC1.1 + PC1.2 + PC1.3, data=dat[1:(last_known_data +i),])
-  DI_AR_model = lm(y ~ PC1 + PC1.1 + PC1.2 + PC1.3 + y_lag1, data= dat[1:(last_known_data +i),])
-  AR_model = lm(y ~ y_lag1, data= dat[1:(last_known_data +i),])
-
-  # make 1-step ahead prediction for new data
-  y_hat_DI =  predict(DI_model, newdata = tail(dat, n=1))
-  y_hat_DI_AR =  predict(DI_AR_model, newdata = tail(dat, n=1))
-  y_hat_AR = predict(AR_model, newdata = tail(dat, n=1))
-  
-  #predictions[i+1,] = c(date=dates[(last_known_data +i+1)], y_hat_DI , y_hat_DI_AR, y_hat_AR)
-  predictions = c(date=dates[(last_known_data +i+1)], y_hat_DI , y_hat_DI_AR, y_hat_AR)
-  return(predictions)
+    # make 1-step ahead prediction using the new data
+    y_hat_DI    =  predict(DI_model, newdata = dat_new)
+    y_hat_DI_AR =  predict(DI_AR_model, newdata = dat_new)
+    y_hat_AR    = predict(AR_model, newdata = dat_new)
+    
+    # gathers the predictions in a numeric vector
+    predictions = c(date = as.numeric(dates[(last_known_data +i+1)]), y_hat_DI , y_hat_DI_AR, y_hat_AR)
+    return(predictions)
 }
 
-predictions = as.data.frame(t(sapply(0:23,predict_multiple)))
-predictions[,1] = as.POSIXct(predictions[,1], origin = origin)
-colnames(predictions) <- c("date", "y_hat_DI", "y_hat_DI_AR", "y_hat_AR")
+forecasts           = as.data.frame(t(sapply(0:23,predict_multiple)))
+forecasts$date      = as.POSIXct(forecasts$date, origin = origin)
+forecasts$y         = x_raw$`S&P500`["2015-01-01/2016-12-01"]
+colnames(forecasts) = c("date", "y_hat_DI", "y_hat_DI_AR", "y_hat_AR", "y")
 
-forecasts = predictions[1:23,]
-forecasts$y = as.numeric(x_raw.$`S&P500`["2015-01-01/2016-11-01"])
-forecasts
-
-{jpeg('PCAplot.jpg')
-{plot(forecasts$date, forecasts$y, type = "p", pch = 20, xlab = "Month", ylab = "y-value" )
-points(forecasts$date, forecasts$y_hat_DI, pch=20, col ="red")
-points(forecasts$date, forecasts$y_hat_DI_AR, pch=20, col ="orange")
-points(forecasts$date, forecasts$y_hat_AR, pch=20, col ="green")
-legend( x="topleft", 
+#{jpeg('PCAplot.jpg')
+{ plot(forecasts$date, forecasts$y, type = "b",pch=19, xlab = "Month", ylab = "y-value" )
+points(forecasts$date, forecasts$y_hat_DI, type = "b",pch=19, col ="red")
+points(forecasts$date, forecasts$y_hat_DI_AR, type = "b",pch=19,lty=2, col ="orange")
+points(forecasts$date, forecasts$y_hat_AR, type = "b",pch=19, col ="green")
+legend( x="bottomright", 
         legend=c("y","y_hat_DI", "y_hat_DI_AR", "y_hat_AR"),
-        col=c("black","red", "orange", "green"), lwd=1, lty=c(0,0), 
-        pch=c(20) )
+        col=c("black","red", "orange", "green"), lwd=1, lty=c(1,1,2,1)
+        , pch=19, cex = 0.8)
 }
-dev.off()}
-
+#dev.off()}
 
 save(forecasts, file="forecasts.RData")
-
 ```

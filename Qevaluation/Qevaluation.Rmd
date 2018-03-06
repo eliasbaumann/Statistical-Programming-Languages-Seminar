@@ -12,14 +12,16 @@ knitr::opts_chunk$set(echo = TRUE)
 library(forecast)
 load("../Qforecasting/forecasts.RData")
 
-
-# RMSE
-RMSE = function(y,y_hat){sum(sqrt((y - y_hat)^2)) /length(y_hat)}
-RMSE_tab = c(DI = RMSE(forecasts$y, forecasts$y_hat_DI), DI_AR  = RMSE(forecasts$y, forecasts$y_hat_DI_AR), AR = RMSE(forecasts$y, forecasts$y_hat_AR))
+# Calculates the Root Mean Square Error for each of the models
+RMSE     = function(y,y_hat){sum(sqrt((y - y_hat)^2)) /length(y_hat)}
+RMSE_tab = c(DI     = RMSE(forecasts$y, forecasts$y_hat_DI),
+             DI_AR  = RMSE(forecasts$y, forecasts$y_hat_DI_AR),
+             AR     = RMSE(forecasts$y, forecasts$y_hat_AR))
 RMSE_tab
-forecasts$e_DI = forecasts$y_hat_DI - forecasts$y
+
+forecasts$e_DI    = forecasts$y_hat_DI    - forecasts$y
 forecasts$e_DI_AR = forecasts$y_hat_DI_AR - forecasts$y
-forecasts$e_AR = forecasts$y_hat_AR - forecasts$y
+forecasts$e_AR    = forecasts$y_hat_AR    - forecasts$y
 
 dm.test(forecasts$e_DI, forecasts$e_AR, h = 1, power = 1)
 dm.test(forecasts$e_DI_AR, forecasts$e_AR, h = 1, power = 1)
