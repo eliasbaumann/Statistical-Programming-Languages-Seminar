@@ -11,8 +11,8 @@ load("../Qload/data.RData")
 # check for NA values
 any(is.na(train))
 
+#Stock & Watson do not treat missing values. This project does not need to as all data is complete.
 
-colnames(train)
 # compare some data
 tmp    = train[, c("date", "INDPRO", "S&P500", "GDAXI", "MANEMP")]
 melted = melt(tmp, measure.vars = colnames(tmp[-1]))
@@ -32,9 +32,6 @@ boxplot(train[, -1], varwidth = TRUE)
 # since this is macroeconomic data and all outliers are explainable by events or legislations (which can be
 # treated as events as well). The paper this work is based on removes all observations exceeding 10 times the
 # interquartile range from the median
-
-#impute missing values
-
 
 # Augmented Dickey Fuller Test
 

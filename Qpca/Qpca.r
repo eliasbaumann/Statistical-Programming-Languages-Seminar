@@ -23,27 +23,6 @@ y.sample = (x.sample$`S&P500`)
 
 #How many Principal Components need to be retained? - Parallel-Analysis of Horn
 
-# 2.1) Matrix-Plot
-p = solve(cor(x.sample, use = "complete.obs"))
-matplot(p, show.legend = T, axes = F)
-# Result: The diagonal elements of the matrix lie above the non-diagonal elements. This
-# indicates suitability of dataset for PC/FA.
-
-# 2.2) Bartlett-Test of Sphericity
-
-# Result: P-Value is way below 0.05. The null hypothesis of the correlation matrix being the
-# identity matrix can be rejected; the dataset is suitable.
-
-# 2.3) What correlations might drive our principal comonent analysis?
-pairs(dat_pca1, cex = 0.5, upper.panel = NULL)
-# Interpretation: The plot implies correlations b/w most of the variables - exception: GDP
-# growth rate.
-
-# 2.4) Main indicator for suitability: KMO/MSA
-KMO(dat_pca1)
-# MSA for GDP-Growth-Rate is just below the 0.5 threshold (0.46). In a first attempt I keep
-# it. After having conducted the first PCA, I repeat an alternative PCA w/o GDP growth rate.
-
 pca = function(x) {
     #compute eigen values to create orthogonal matrices U and V
     xTx  = t(x) %*% x
