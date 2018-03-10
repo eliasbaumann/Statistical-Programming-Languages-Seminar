@@ -29,6 +29,9 @@ unpreparedplot = unpreparedplot + theme(legend.position = "none")
 
 # check for outliers visually
 boxplot(train[, -1], varwidth = TRUE)
+pdf(file = "box.pdf", width = 10)
+boxplot(train[, -1], varwidth = TRUE)
+dev.off()
 # since this is macroeconomic data and all outliers are explainable by events or legislations (which can be
 # treated as events as well). The paper this work is based on removes all observations exceeding 10 times the
 # interquartile range from the median
