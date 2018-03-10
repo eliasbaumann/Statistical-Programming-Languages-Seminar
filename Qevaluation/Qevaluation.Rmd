@@ -12,20 +12,64 @@ knitr::opts_chunk$set(echo = TRUE)
 library(forecast)
 load("../Qforecasting/forecasts.RData")
 
+m_DI    = cbind(forecasts$DI_h1,forecasts$DI_h3,forecasts$DI_h6,forecasts$DI_h12)
+m_DI_AR = cbind(forecasts$DI_AR_h1,forecasts$DI_AR_h3,forecasts$DI_AR_h6,forecasts$DI_AR_h12)
+m_AR    = cbind(forecasts$AR_h1,forecasts$AR_h3,forecasts$AR_h6,forecasts$AR_h12)
+colnames(m_DI)   =c("DI_h1","DI_h3","DI_h6","DI_h12")
+colnames(m_DI_AR)=c(" DI_AR_h1"," DI_AR_h3"," DI_AR_h6","DI_AR_h12")
+colnames(m_AR)   =c("AR_h1","AR_h3","AR_h6","AR_h12")
+
 # Calculates the Root Mean Square Error for each of the models
-RMSE     = function(y,y_hat){sum(sqrt((y - y_hat)^2)) /length(y_hat)}
-RMSE_tab = c(DI     = RMSE(forecasts$y, forecasts$y_hat_DI),
-             DI_AR  = RMSE(forecasts$y, forecasts$y_hat_DI_AR),
-             AR     = RMSE(forecasts$y, forecasts$y_hat_AR))
-RMSE_tab
+RMSE     = function(y_hat){sum(sqrt((forecasts$y - y_hat)^2)) /length(y_hat)}
 
-forecasts$e_DI    = forecasts$y_hat_DI    - forecasts$y
-forecasts$e_DI_AR = forecasts$y_hat_DI_AR - forecasts$y
-forecasts$e_AR    = forecasts$y_hat_AR    - forecasts$y
+apply(m_DI,2,RMSE)
+apply(m_DI_AR,2,RMSE)
+apply(m_AR,2,RMSE)
 
-dm.test(forecasts$e_DI, forecasts$e_AR, h = 1, power = 1)
-dm.test(forecasts$e_DI_AR, forecasts$e_AR, h = 1, power = 1)
+
+
+forecasts$e_DI_h1 = forecasts$DI_h1    - forecasts$y
+forecasts$e_DI_h3 = forecasts$DI_h3    - forecasts$y
+forecasts$e_DI_h6 = forecasts$DI_h6    - forecasts$y
+forecasts$e_DI_h12 = forecasts$DI_h12    - forecasts$y
+
+forecasts$e_DI_AR_h1 = forecasts$DI_AR_h1 - forecasts$y
+forecasts$e_DI_AR_h3 = forecasts$DI_AR_h3 - forecasts$y
+forecasts$e_DI_AR_h6 = forecasts$DI_AR_h6 - forecasts$y
+forecasts$e_DI_AR_h12 = forecasts$DI_AR_h12 - forecasts$y
+
+forecasts$e_AR_h1    = forecasts$AR_h1    - forecasts$y
+forecasts$e_AR_h3    = forecasts$AR_h3    - forecasts$y
+forecasts$e_AR_h6    = forecasts$AR_h6    - forecasts$y
+forecasts$e_AR_h12    = forecasts$AR_h12    - forecasts$y
+
+dm_test = function(e,y_hat){dm.test(e,y_hat,h=1,power=1)}
+
+
+dm.test(forecasts$e_DI_h1, forecasts$e_AR_h1, h = 1, power = 1)
+dm.test(forecasts$e_DI_AR_h1, forecasts$e_AR_h1, h = 1, power = 1)
 dm.test(c(1,1,1),c(1.000001, 0.999999,1), h = 1 , power = 1)
 
 # DM Test can't reject H_0: no statistical significant difference in the two forecasts
+
+#MAE
+MAE = function(y_hat){sum(forecasts$y-y_hat)/length(y_hat)}
+
+apply(m_DI,2,MAE)
+apply(m_DI_AR,2,MAE)
+apply(m_AR,2,MAE)
+
+
+#MAPE
+MAPE  = function(y_hat){sum(100*(forecasts$y-y_hat)/forecasts$y)/length(y_hat)}
+apply(m_DI,2,MAPE)
+apply(m_DI_AR,2,MAPE)
+apply(m_AR,2,MAPE)
+
+#sMAPE
+sMAPE = function(y_hat){sum(200*(forecasts$y-y_hat)/(forecasts$y+y_hat))/length(y_hat)}
+apply(m_DI,2,sMAPE)
+apply(m_DI_AR,2,sMAPE)
+apply(m_AR,2,sMAPE)
+
 ```
