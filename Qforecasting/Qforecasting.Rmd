@@ -21,7 +21,7 @@ predictions     = data.frame(date = "", y_hat_DI = "", y_hat_DI_AR = "", y_hat_A
 end_date        = as.POSIXct("2015-01-01 01:00:00 CET")
 last_known_data = which(dates == end_date)-1
 m               = length(selected_models)
-forecast_dates  = dates[dates >= "2015-01-01" &  dates  <= "2016-12-01"]
+forecast_dates  = dates[dates >= "2015-01-01" &  dates  <= "2017-01-01"]
 
 prep_dat = function(t,h){
     # constructs input data for the step wise model fitting and prediction
@@ -63,6 +63,7 @@ res$predictions = apply(res,1, function(x) update_predict(x['i'], x['t']))
 
 # Use dplyr::inner_join without loading the package, because dplyr masks xts::lag no matter in what sequence the packages are loaded
 # join the information about the models stored in model_sel with the predictions in res
+model_sel$i = c(1:length(selected_models))
 joined_predictions = dplyr::inner_join(model_sel, res)
 
 # put each models prediction in a column of a data.frame and name the columns accordingly
