@@ -86,8 +86,6 @@ seriesDetails    = seriesDetails[order(seriesDetails$id), ]
 train     = createFeatureMatrix(series_ids)
 train[-1] = sapply(train[-1], function(x) as.numeric(as.character(x)))
 
-
-
 # Add additional data for DAX,HSI,NIKKEI225,S&P500
 train[c("GDAXI", "HSI", "N225", "S&P500")] = sapply(c("^dax","^hsi","^nkx","^spx"),getStooqData)
 

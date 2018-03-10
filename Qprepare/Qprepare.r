@@ -3,9 +3,7 @@ library(gridExtra)
 library(reshape2)
 library(dplyr)
 library(data.table)
-
-this.dir <- dirname(parent.frame(2)$ofile)
-setwd(this.dir)
+library(xtable)
 
 load("../Qload/data.RData")
 # check for NA values
@@ -56,9 +54,9 @@ dickey = function(x) {
     dyt_1 = embed(dy, lag+1)[, 2]
     
     # apply linear model to find out if regression coefficient is 1
-    res = summary(lm(dyt ~ yt_1 - 1 + dYt_1))
+    res = summary(lm(dyt ~ yt_1 - 1 + dyt_1))
     # can we reject that regression coefficient is 1?
-    res$coefficients[1, 3] < criticalValues[1]
+    res$coefficients[1, 3] < criticalValues[3]
 }
 
 # apply augmented dickey fuller test to all series
@@ -80,6 +78,9 @@ seriesDetails$preparation = case_when(
     grepl("Personal Consumption", seriesDetails$title) ~ "First Difference of Logarithm",
     TRUE ~ "Second Difference of Logarithm"
     )
+
+#print the table for latex paper
+xtable(seriesDetails)
 
 # create lookup
 dt = as.data.table(seriesDetails)
