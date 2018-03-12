@@ -41,13 +41,19 @@ forecasts$e_DI_AR_h12 = forecasts$DI_AR_h12 - forecasts$y
 forecasts$e_AR_h1    = forecasts$AR_h1    - forecasts$y
 forecasts$e_AR_h3    = forecasts$AR_h3    - forecasts$y
 forecasts$e_AR_h6    = forecasts$AR_h6    - forecasts$y
-forecasts$e_AR_h12    = forecasts$AR_h12    - forecasts$y
-
-dm_test = function(e,y_hat){dm.test(e,y_hat,h=1,power=1)}
+forecasts$e_AR_h12   = forecasts$AR_h12   - forecasts$y
 
 
 dm.test(forecasts$e_DI_h1, forecasts$e_AR_h1, h = 1, power = 1)
+dm.test(forecasts$e_DI_h3, forecasts$e_AR_h3, h = 3, power = 1)
+dm.test(forecasts$e_DI_h6, forecasts$e_AR_h6, h = 6, power = 1)
+dm.test(forecasts$e_DI_h12, forecasts$e_AR_h12, h = 12, power = 1)
+
 dm.test(forecasts$e_DI_AR_h1, forecasts$e_AR_h1, h = 1, power = 1)
+dm.test(forecasts$e_DI_AR_h3, forecasts$e_AR_h3, h = 3, power = 1)
+dm.test(forecasts$e_DI_AR_h6, forecasts$e_AR_h6, h = 6, power = 1)
+dm.test(forecasts$e_DI_AR_h12, forecasts$e_AR_h12, h = 12, power = 1)
+
 dm.test(c(1,1,1),c(1.000001, 0.999999,1), h = 1 , power = 1)
 
 # DM Test can't reject H_0: no statistical significant difference in the two forecasts
