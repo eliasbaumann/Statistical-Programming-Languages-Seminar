@@ -48,22 +48,20 @@ update_predict = function(i,t){
     p = model_sel$p[i]
     q = model_sel$q[i]
 
-    dat   = prep_dat(t,h)
+    dat   = prep_dat(t-1,h)
     model = update(selected_models[[i]], data = dat)
-    
-    dat        = prep_dat(t,h)
     prediction = tail(predict(model, newdata = dat),1)
     return(prediction)
 }
 
 # res holds all combinations of models i and forecasting objective months t
-res = expand.grid(i = c(1:m),t = c(0:length(forecast_dates)))
+res = expand.grid(i = c(1:m),t = c(1:length(forecast_dates)))
 # Applies the update predict function on res
 res$predictions = apply(res,1, function(x) update_predict(x['i'], x['t']))
 
 # Use dplyr::inner_join without loading the package, because dplyr masks xts::lag no matter in what sequence the packages are loaded
 # join the information about the models stored in model_sel with the predictions in res
-model_sel$i = c(1:length(selected_models))
+model_sel$i = c(1:m)
 joined_predictions = dplyr::inner_join(model_sel, res)
 
 # put each models prediction in a column of a data.frame and name the columns accordingly
