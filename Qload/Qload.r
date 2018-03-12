@@ -1,9 +1,6 @@
 library(httr)
 library(jsonlite)
 
-this.dir = dirname(parent.frame(2)$ofile)
-setwd(this.dir)
-
 # getting macroeconomic data from FRED
 getJsonData = function(x) {
     connection        = "https://api.stlouisfed.org/fred/series/observations?"
@@ -37,8 +34,8 @@ getSeriesInfo = function(x) {
 getStooqData = function(x) {
     connection = "https://stooq.com/q/d/l/?"
     symbol     = paste("s=", x, "&", sep = "")
-    remainder  = "d1=19920131&d2=20161231&i=m"
-    read.csv(paste(connection, symbol, remainder, sep = ""))
+    dateandtime  = "d1=19920131&d2=20161231&i=m"
+    read.csv(paste(connection, symbol, dateandtime, sep = ""))$Close
 }
 
 
@@ -90,8 +87,7 @@ train     = createFeatureMatrix(series_ids)
 train[-1] = sapply(train[-1], function(x) as.numeric(as.character(x)))
 
 # Add additional data for DAX,HSI,NIKKEI225,S&P500
-train[c("GDAXI", "HSI", "N225", "S&P500")] = cbind(getStooqData("^dax")$Close, getStooqData("^hsi")$Close, getStooqData("^nkx")$Close, 
-    getStooqData("^spx")$Close)
+train[c("GDAXI", "HSI", "N225", "S&P500")] = sapply(c("^dax","^hsi","^nkx","^spx"),getStooqData)
 
 save(list = c("train", "seriesDetails"), file = "data.RData")
 write.csv(seriesDetails, file = "seriesDetails.csv")

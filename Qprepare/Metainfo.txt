@@ -1,6 +1,6 @@
 Name of Quantlet: 'Qprepare'
 Published in: 'Statistical programming languages - Student Project on "Macroeconomic Forecasting using Diffusion Indexes"'
-Author: Elias Baumann, Katja Metzger, Josef Lorenz Rumberger
+Author: Elias Baumann
 Description: Applies data preprocessing to the loaded time series data i.e. first and second differencing.
 Keywords: test, preprocessing, logarithmic, hypothesis-testing, normalization
 Datafile: Qload/data.RData

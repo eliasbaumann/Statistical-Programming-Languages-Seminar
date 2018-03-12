@@ -1,6 +1,6 @@
 Name of Quantlet: 'Qpca'
 Published in: 'Statistical programming languages - Student Project on "Macroeconomic Forecasting using Diffusion Indexes"'
-Author: Elias Baumann, Katja Metzger, Josef Lorenz Rumberger
+Author: Katja Metzger
 Description: Applies principal component analysis to the dataset to reduce dimensionality
 Keywords: time-series, pca, screeplot, principal-components, eigenvectors, decomposition, svd  
 Datafile: prepareddataSC.Rdata
