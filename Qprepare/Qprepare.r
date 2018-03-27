@@ -138,7 +138,48 @@ differencedloggedplot = ggplot(data = melted2, aes(x = date, y = value, colour =
 
 # center and scale
 scaledtrain       = trainprepared
-scaledtrain[, -1] = sapply(trainprepared[, -1], scale)
+
+# function to subtract the mean from a vector
+# done separately to avoid doing it inline
+subtractMean = function(x){
+  x - mean(x)
+}
+
+# calculates the standard deviation
+std = function(x){
+  sqrt( sum( (x - mean(x) )^2) / ( (length(x)-1) ) )
+} 
+
+# calculates the root mean square (not to be confused with Root mean square error)
+rms = function(x){
+  sqrt(sum(x^2)/(length(x)-1))
+}
+
+
+a = matrix(c(1,2,3,4,6.5,8),nrow = 3,ncol = 2)
+
+# custom scale function based on the functionality of R's base package scale function
+# this only works by applying it column wise to data. Applying it to a matrix will result in errors
+scaleCustom = function(x,center = T,scale = T){
+  if(center == T){
+    x = subtractMean(x)
+    if(scale == T){
+      x / std(x)
+    }else{
+      x
+    }
+  }else{
+    if(scale == T){
+      x / rms(x)
+    }else{
+      x
+    }
+  }
+}
+
+
+
+scaledtrain[, -1] = apply(trainprepared[,-1],2,scaleCustom)
 
 # save data 
 save(scaledtrain, file = "prepareddataSC.RData")
