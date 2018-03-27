@@ -1,0 +1,6 @@
+Name of Quantlet: 'Qmodel_select'
+Published in: 'Statistical programming languages - Student Project on "Macroeconomic Forecasting using Diffusion Indexes"'
+Author: Josef Lorenz Rumberger
+Description: Selects models based no the Bayesian Information Criterion (BIC), for each of the desired model specifications.
+Keywords: linear-model, model, factor-model, bic, model-selection, autoregressive, 
+Datafile: Qpca/diff_index.RData, /Qpca/y.sample.RData

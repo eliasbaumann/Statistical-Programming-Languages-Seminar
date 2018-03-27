@@ -63,7 +63,8 @@ dickey = function(x) {
 seriesDetails$dickeyres = sapply(colnames(train[, -1]), dickey)
 
 # Define which preprocessing step should be done for the time series This is based on the appendix of the paper
-# and on the authors choices of what to apply
+# and on the authors choices of what to apply. As it is not clear to why some of the preprocessing steps were applied.
+# we use specific keywords to find series that are treated in a certain way. 
 
 seriesDetails$preparation = case_when(
     seriesDetails$units %in% c("3-Month Annualized Percent Change", "Percent", 
@@ -97,7 +98,8 @@ secondDifferenceLog = function(x) {
     tmp
 }
 
-# use lookup to figure out what function to apply to data
+# use a lookup to figure out what function to apply to data
+# this function applies the preprocessing depending on the series details lookup table
 prepare = function(data, lookup) {
     tmp = data[, -1]
     
@@ -120,6 +122,7 @@ prepare = function(data, lookup) {
     data
 }
 
+#apply the preprocessing function
 trainprepared = prepare(train, dt)
 
 # check if there is any time series that fails the dickey fuller test

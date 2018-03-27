@@ -1,0 +1,6 @@
+Name of Quantlet: 'Qforecasting'
+Published in: 'Statistical programming languages - Student Project on "Macroeconomic Forecasting using Diffusion Indexes"'
+Author: Josef Lorenz Rumberger
+Description: Forecasts the time series for 1,3,6 and 12 months ahead using the models from Qmodel_select
+Keywords: time-series, forecast, linear-model, model, factor-model, autoregressive  
+Datafile: /Qprepare/prepareddataSC.RData, /Qmodel_select/model_sel.RData, Qmodel_select/selected_models.RData

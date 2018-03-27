@@ -9,16 +9,16 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ```{r}
 # needed only for package installation or update
-install.packages("yaml")
+#install.packages("yaml")
 library(devtools)
-devtools::install_github("lborke/yamldebugger")
+#devtools::install_github("lborke/yamldebugger")
 
 # load the package every time you want to use 'yamldebugger'
 library(yamldebugger)
 
 
-"data" %in% allKeywords
-allKeywords
+
+#allKeywords
 d_init = yaml.debugger.init(getwd(), show_keywords = FALSE)
 qnames = yaml.debugger.get.qnames(d_init$RootPath)
 d_results = yaml.debugger.run(qnames, d_init)
