@@ -40,7 +40,7 @@ screeplot(pca_data, main = deparse(substitute(pca_data)),type = "l")
 dev.off()
 
 
-diff_index = xts(pca_data$x[, 1:5], order.by = dates[1:273])
+diff_index = xts(pca_data$x[, 1:4], order.by = dates[1:273])
 save(diff_index, file = "diff_index.RData")
 save(x.sample, file = "x.sample.RData")
 save(y.sample, file = "y.sample.RData")
