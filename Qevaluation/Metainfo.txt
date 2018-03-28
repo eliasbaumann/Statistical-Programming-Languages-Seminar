@@ -1,0 +1,6 @@
+Name of Quantlet: 'Qevaluation'
+Published in: 'Statistical programming languages - Student Project on "Macroeconomic Forecasting using Diffusion Indexes"'
+Author: Katja Metzger
+Description: Evaluation of model performance compared to benchmark using different error measures and tests
+Keywords: diebold-mariano-test, Testing, error, evaluation, rmse
+Datafile: /Qforecasting/forecasts.RData
