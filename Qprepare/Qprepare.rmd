@@ -126,10 +126,12 @@ differencedloggedplot = ggplot(data=testy2, aes(x=date,y=value,colour=variable))
 #center and scale
 unscaled_train = trainprepared
 scaledtrain = trainprepared
-scaledtrain[,-1]=sapply(trainprepared[,-1],scale)
 
+
+scaledtrain[,-1]=sapply(trainprepared[,-1],scale)
+sapply(trainprepared,scale)
 save(scaledtrain, file="prepareddataSC.RData")
-save(unscaled_train, file = "prepareddata.RData")
+
 
 tmp = scaledtrain[,c("date","INDPRO","S&P500","GDAXI","MANEMP")]
 testy3 = melt(tmp,measure.vars=colnames(tmp[-1]))
