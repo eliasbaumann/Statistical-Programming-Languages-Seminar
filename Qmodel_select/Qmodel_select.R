@@ -44,30 +44,28 @@ extract_model = function(models){
   # Input : data.frame x containing all models from a certain family
   # Output: data.frame out containing the rows of x with the best models based on BIC
   models_h = list(models[models$h == 1,],models[models$h == 3,],models[models$h == 6,],models[models$h == 12,])
-  res = lapply(models_h, function(x){x[which(x$BIC == min(x$BIC, na.rm = T)),]})
-  out = data.frame(rbind(res[[1]], res[[2]],res[[3]],res[[4]]))
+  res     = lapply(models_h, function(x){x[which(x$BIC == min(x$BIC, na.rm = T)),]})
+  out     = data.frame(rbind(res[[1]], res[[2]],res[[3]],res[[4]]))
   return(out)
 }
 
 # selects the optimal DI model based on BIC
-DI_models = model_select[model_select$p == 0 & model_select$diff > 0,]
+DI_models       = model_select[model_select$p == 0 & model_select$diff > 0,]
 DI_model_select = extract_model(DI_models)
 
 # selects the optimal DI_AR model based on BIC
-DI_AR_models = model_select[model_select$diff > 0 & model_select$p > 0,]
+DI_AR_models       = model_select[model_select$diff > 0 & model_select$p > 0,]
 DI_AR_model_select = extract_model(DI_AR_models)
-#DI_AR_model_select = DI_AR_models[which(DI_AR_models$BIC == min(DI_AR_models$BIC, na.rm = T)),]
 
 # selects the optimal AR model based on BIC
-AR_models = model_select[model_select$diff == 0 & model_select$p > 0, ]
+AR_models       = model_select[model_select$diff == 0 & model_select$p > 0, ]
 AR_model_select = extract_model(AR_models)
-#AR_model_select = AR_models[which(AR_models$BIC == min(AR_models$BIC, na.rm = T)),]
 
 # stores all selected model specifications in data frame
 model_sel = rbind(DI_model_select, DI_AR_model_select, AR_model_select)
 
 # Extracts all choosen models from list of models and associated BICs
-selected_models = lapply(as.integer(row.names(model_sel)), function(x){res[[x]][[2]]})
+selected_models      = lapply(as.integer(row.names(model_sel)), function(x){res[[x]][[2]]})
 row.names(model_sel) = c("DI_h1", "DI_h3", "DI_h6", "DI_h12",
                          "DI_AR_h1", "DI_AR_h3", "DI_AR_h6", "DI_AR_h12",
                          "AR_h1", "AR_h3", "AR_h6", "AR_h12")

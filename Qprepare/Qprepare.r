@@ -1,3 +1,6 @@
+# Qprepare
+# Applies data preprocessing to the loaded time series data.
+
 library(ggplot2)
 library(gridExtra)
 library(reshape2)
@@ -51,7 +54,7 @@ dickey = function(x) {
     dyt = embed(dy, lag + 1)[, 1]
     
     # get lagged values
-    yt_1 = train[, x][(lag + 1):length(dy)]
+    yt_1  = train[, x][(lag + 1):length(dy)]
     # deltaYt-1
     dyt_1 = embed(dy, lag + 1)[, 2]
     
@@ -69,14 +72,19 @@ seriesDetails$dickeyres = sapply(colnames(train[, -1]), dickey)
 # preprocessing steps were applied.  we use specific keywords to find series that are treated in a
 # certain way.
 
-seriesDetails$preparation = case_when(seriesDetails$units %in% c("3-Month Annualized Percent Change", 
-    "Percent", "Percent Change at Annual Rate", "Percent of Capacity") ~ "Nothing", grepl("Nonsupervisory Employees: Manufacturing", 
-    seriesDetails$title) ~ "Nothing", grepl("Trade Balance", seriesDetails$title) ~ "First Difference", 
-    grepl("Consumer Price", seriesDetails$title) ~ "Second Difference of Logarithm", grepl("Hourly Earnings", 
-        seriesDetails$title) ~ "Second Difference of Logarithm", grepl("Index", seriesDetails$units) ~ 
-        "First Difference of Logarithm", grepl("Thousands", seriesDetails$units) ~ "First Difference of Logarithm", 
-    seriesDetails$units %in% "Millions of Dollars" ~ "First Difference of Logarithm", grepl("Personal Consumption", 
-        seriesDetails$title) ~ "First Difference of Logarithm", TRUE ~ "Second Difference of Logarithm")
+seriesDetails$preparation = case_when(
+  seriesDetails$units %in% c("3-Month Annualized Percent Change", 
+    "Percent", "Percent Change at Annual Rate", "Percent of Capacity") ~ "Nothing",
+  grepl("Nonsupervisory Employees: Manufacturing", seriesDetails$title) ~ "Nothing",
+  grepl("Trade Balance", seriesDetails$title) ~ "First Difference",
+  grepl("Consumer Price", seriesDetails$title) ~ "Second Difference of Logarithm",
+  grepl("Hourly Earnings", seriesDetails$title) ~ "Second Difference of Logarithm",
+  grepl("Index", seriesDetails$units) ~ "First Difference of Logarithm",
+  grepl("Thousands", seriesDetails$units) ~ "First Difference of Logarithm",
+  seriesDetails$units %in% "Millions of Dollars" ~ "First Difference of Logarithm",
+  grepl("Personal Consumption", seriesDetails$title) ~ "First Difference of Logarithm",
+  TRUE ~ "Second Difference of Logarithm"
+  )
 
 # print the table for latex paper
 xtable(seriesDetails)
@@ -122,7 +130,7 @@ prepare = function(data, lookup) {
             
         }
     })
-    data = data[-c(1, 2), ]
+    data       = data[-c(1, 2), ]
     data[, -1] = res
     data
 }
