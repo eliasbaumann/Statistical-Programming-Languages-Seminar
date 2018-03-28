@@ -1,4 +1,5 @@
 library("xts")
+setwd("C:/Users/Ellet/OneDrive/Winfo Studium/WS1718/Statistical Programming Languages/repo/statproglang/Qpca")
 load("../Qprepare/prepareddataSC.RData")
 
 # first row of train only contains zeros! 
@@ -34,7 +35,10 @@ pca = function(x) {
 # Extract PCAs
 pca_data = pca(x.sample)
 
+pdf(file = "PCAplot.pdf", width = 8, height = 6, paper = "special")
 screeplot(pca_data, main = deparse(substitute(pca_data)),type = "l")
+dev.off()
+
 
 diff_index = xts(pca_data$x[, 1:5], order.by = dates[1:273])
 save(diff_index, file = "diff_index.RData")
