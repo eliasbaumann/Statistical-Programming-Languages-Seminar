@@ -6,7 +6,7 @@ load("../Qpca/y.sample.RData")
 
 dat = cbind(diff_index, y.sample)
 # data frame that holds all possible model parameters
-model_select = expand.grid(diff = c(0:5), q = c(1:8), p = c(0:8), h = c(1,3,6,12))
+model_select = expand.grid(diff = c(0:4), q = c(1:8), p = c(0:8), h = c(1,3,6,12))
 
 model_ = function(diff, q, p, h){
   # Fits model according to input specification
