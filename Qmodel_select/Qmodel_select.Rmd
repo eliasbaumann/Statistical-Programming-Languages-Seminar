@@ -64,7 +64,7 @@ DI_models = model_select[model_select$p == 0 & model_select$diff > 0,]
 DI_model_select = extract_model(DI_models)
 
 # selects the optimal DI_AR model based on BIC
-DI_AR_models = model_select[model_select$diff > 0 & model_select$p > 0,]
+DI_AR_models = model_select[model_select$diff > 0 & mode_select$p > 0,]
 DI_AR_model_select = extract_model(DI_AR_models)
 #DI_AR_model_select = DI_AR_models[which(DI_AR_models$BIC == min(DI_AR_models$BIC, na.rm = T)),]
 
