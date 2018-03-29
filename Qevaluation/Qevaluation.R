@@ -1,21 +1,8 @@
----
-title: "Qevaluation"
-output: html_document
----
-
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
-```
-
-# Evaluation of model performance
-```{r}
 load("../Qforecasting/forecasts.RData")
-
 m_h1  = data.frame(DI = forecasts$DI_h1, DI_AR  = forecasts$DI_AR_h1, AR  = forecasts$AR_h1, h = 1)
 m_h3  = data.frame(DI = forecasts$DI_h3, DI_AR  = forecasts$DI_AR_h3, AR  = forecasts$AR_h3, h = 3)
 m_h6  = data.frame(DI = forecasts$DI_h6, DI_AR  = forecasts$DI_AR_h6, AR  = forecasts$AR_h6, h = 6)
 m_h12 = data.frame(DI = forecasts$DI_h12, DI_AR = forecasts$DI_AR_h12, AR = forecasts$AR_h12, h = 12)
-
 
 # Calculates the Root Mean Square Error for each of the models
 RMSE.fun    = function(y_hat){sqrt(sum((forecasts$y - y_hat)^2)/length(y_hat))}
@@ -50,5 +37,3 @@ dm.test   = function(y_hat, benchmark, h){
 
 dm.results = lapply(list(m_h1, m_h3, m_h6, m_h12), function(m) list(DI = dm.test(m$DI,m$AR, h = m$h[1]), DI_AR = dm.test(m$DI_AR,m$AR, h = m$h[1])))
 dm.results
-
-```
