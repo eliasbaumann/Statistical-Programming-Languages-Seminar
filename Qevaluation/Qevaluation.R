@@ -32,7 +32,7 @@ dm.test   = function(y_hat, benchmark, h){
   # compute 
   dv      = sum(c(d.cov[1], 2 * d.cov[-1])) / length(d)
   t.value = res$coefficients/sqrt(dv)
-  p.value = 2* pt(t.value , df = n - 1)
+  p.value = (1-pt(abs(t.value) , df = n - 1))*2
   return(list(t.value = t.value,p.value = p.value))}
 
 dm.results = lapply(list(m_h1, m_h3, m_h6, m_h12), function(m) list(DI = dm.test(m$DI,m$AR, h = m$h[1]), DI_AR = dm.test(m$DI_AR,m$AR, h = m$h[1])))
