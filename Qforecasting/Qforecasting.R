@@ -72,8 +72,7 @@ plot_models = function(DI, DI_AR, AR){
           col=c("black","red", "orange", "green"), lwd=1, lty=c(1,1,2,1)
           , pch=19, cex = 0.8)
 }
-#{jpeg('PCAplot.jpg')
-#dev.off()}
+
 plot_models(forecasts$DI_h1, forecasts$DI_AR_h1, forecasts$AR_h1)
 plot_models(forecasts$DI_h3, forecasts$DI_AR_h3, forecasts$AR_h3)
 plot_models(forecasts$DI_h6, forecasts$DI_AR_h6, forecasts$AR_h6)
