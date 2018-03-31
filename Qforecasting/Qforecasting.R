@@ -21,7 +21,7 @@ prep_dat = function(t,h){
   x        = x_raw[1:(last_known_data + t - h),] 
   y.sample = x$`S&P500`
   pca_data = pca(x)
-  diff_index = xts(pca_data$x[,1:5], order.by = dates[1:(last_known_data + t - h)] )
+  diff_index = xts(pca_data$x[,1:4], order.by = dates[1:(last_known_data + t - h)] )
   dat = cbind(diff_index, y.sample)
   return(dat)
 }
