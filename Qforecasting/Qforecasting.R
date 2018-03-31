@@ -2,6 +2,7 @@ library("xts")
 load("../Qprepare/prepareddataSC.RData")
 load("../Qmodel_select/model_sel.RData")
 load("../Qmodel_select/selected_models.RData")
+source("../Qpca/Qpca.R")
 
 origin          = "1970-01-01 00:00:00"
 dates           = as.POSIXct(scaledtrain[,1])
@@ -19,9 +20,7 @@ prep_dat = function(t,h){
   # Output: xts dat holding the diffusion indexes 1:5 and y.sample
   x        = x_raw[1:(last_known_data + t - h),] 
   y.sample = x$`S&P500`
-  pca_data = prcomp(x,
-                    center = F,
-                    scale. = F)
+  pca_data = pca(x)
   diff_index = xts(pca_data$x[,1:5], order.by = dates[1:(last_known_data + t - h)] )
   dat = cbind(diff_index, y.sample)
   return(dat)
