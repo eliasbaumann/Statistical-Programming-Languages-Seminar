@@ -1,3 +1,6 @@
+# Evaluation of model performance
+# Evaluates the models using relative root mean square error and modiefied
+# Diebold-Mariano test
 load("../Qforecasting/forecasts.RData")
 m_h1  = data.frame(DI = forecasts$DI_h1, DI_AR  = forecasts$DI_AR_h1, AR  = forecasts$AR_h1, h = 1)
 m_h3  = data.frame(DI = forecasts$DI_h3, DI_AR  = forecasts$DI_AR_h3, AR  = forecasts$AR_h3, h = 3)
